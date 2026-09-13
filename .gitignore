@@ -1,0 +1,8 @@
+# ontwerpbestanden, geen onderdeel van de game
+*.zip
+
+# systeembestanden
+desktop.ini
+Thumbs.db
+.DS_Store
+.claude/

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="nl" translate="no">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="google" content="notranslate">
+  <title>GeoSearch</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌍</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=EB+Garamond:wght@400;500;600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div id="app"></div>
+
+  <div class="lightbox" id="lightbox" hidden role="dialog" aria-modal="true">
+    <button class="lb-close" type="button" id="lb-close" aria-label="Sluiten">✕</button>
+    <div class="lb-card">
+      <div class="lb-plate" id="lb-plate"></div>
+      <div class="lb-foot">
+        <div>
+          <div class="lb-title" id="lb-title"></div>
+          <div class="lb-sub" id="lb-sub"></div>
+        </div>
+        <div class="lb-nav">
+          <button class="sq-btn" type="button" id="lb-prev" aria-label="Vorige">←</button>
+          <button class="sq-btn" type="button" id="lb-next" aria-label="Volgende">→</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dialog" id="dialog" hidden role="alertdialog" aria-modal="true" aria-labelledby="dialog-title" aria-describedby="dialog-text">
+    <div class="dialog-card">
+      <div class="dialog-title" id="dialog-title"></div>
+      <div class="dialog-text" id="dialog-text"></div>
+      <div class="dialog-actions">
+        <button class="btn outline" type="button" id="dialog-cancel"></button>
+        <button class="btn dark" type="button" id="dialog-ok"></button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="js/i18n.js"></script>
+  <script src="js/riddles.js"></script>
+  <script src="js/cards.js"></script>
+  <script src="js/places.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
