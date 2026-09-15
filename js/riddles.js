@@ -190,10 +190,14 @@ window.GeoRiddles = [
       nl: [
         'Het vlaggetje bovenaan vertelt op welk continent je zoekt.',
         'Trek de lijn van I naar II. De kust van de golf sluit de lijn tot een gesloten letter.',
+        'De golf is de Golf van Mexico. Zoek ze op in het zoekvak.',
+        'Volg vanaf Cuba de kust langs Florida, Texas en Mexico terug naar Tikal. Na II is elke klik een extra punt.',
       ],
       en: [
         'The small flag at the top tells you which continent to search.',
         'Draw the line from I to II. The coast of the gulf closes the line into a closed letter.',
+        'The gulf is the Gulf of Mexico. Look it up in the search box.',
+        'From Cuba, follow the coast past Florida, Texas and Mexico back to Tikal. After II, every click adds an extra point.',
       ],
     },
   },
