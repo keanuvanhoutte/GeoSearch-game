@@ -440,7 +440,7 @@
       </svg>`),
 
     /* Plaat IV — raadsel D (D) */
-    D: () => scoped(`
+    D: (lang) => scoped(`
       <svg class="riddle-svg" viewBox="0 0 1200 700" role="img" aria-label="Plaat IV — Raadsel D" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <pattern id="pD-g" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#2b2118" stroke-opacity=".09" stroke-width="1"></path></pattern>
@@ -469,7 +469,7 @@
         <path d="M684.0 389.1V353.1" stroke="#2b2118" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="5 5"></path>
         <g data-num="0">
         <rect x="422.0" y="307.1" width="108" height="46" fill="#f1e7d3" stroke="#2b2118" stroke-width="3"></rect>
-        <text x="476.0" y="340.1" text-anchor="middle" font-family="'EB Garamond',serif" font-size="28" font-weight="600" letter-spacing="2" fill="#2b2118">MAR</text>
+        <text x="476.0" y="340.1" text-anchor="middle" font-family="'EB Garamond',serif" font-size="28" font-weight="600" letter-spacing="2" fill="#2b2118">${lang === 'en' ? 'MOR' : 'MAR'}</text>
         </g>
         <g data-num="1">
         <rect x="622.0" y="307.1" width="124" height="46" fill="#f1e7d3" stroke="#2b2118" stroke-width="3"></rect>

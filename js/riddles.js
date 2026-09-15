@@ -129,7 +129,7 @@ window.GeoRiddles = [
         point: [31.8, -7.1], zones: [[34.0, -5.0, 450], [31.0, -7.5, 550]],
         hint: {
           nl: 'MAR: de pijl vertrekt in een land waarvan de naam zo begint.',
-          en: 'MAR: the arrow starts in a country whose name begins like that.',
+          en: 'MOR: the arrow starts in a country whose name begins like that.',
         } },
       { key: 'togo', name: { nl: 'Togo', en: 'Togo' },
         point: [8.6, 0.9], zones: [[8.2, 1.0, 500]],
