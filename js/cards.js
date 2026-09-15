@@ -1,7 +1,8 @@
 /* Raadselkaarten als atlasplaten, overgenomen uit de Claude Design-projecten:
    Plaat I (Plaat.dc.html), Plaat II en IV (Raadselplaten B-E.dc.html),
    Plaat III herzien (2a) en Plaat V herzien (2b).
-   De vakken I, II, III… zijn tegelijk de volgorde waarin de lijn de letter tekent. */
+   De vakken I, II, III… zijn tegelijk de volgorde waarin de lijn de letter tekent.
+   data-num="0" enz. markeert het vak (of bij raadsel D het label) van elk nummer: dat licht op bij de hint van dat nummer. */
 (function () {
   let seq = 0;
 
@@ -33,7 +34,7 @@
         <text x="1140" y="72" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="15" letter-spacing="3" fill="#6b5943">RAADSEL A · V PLAATSEN</text>
         <path d="M60 92H1140" stroke="#2b2118" stroke-opacity=".45" stroke-width="1"></path>
 
-        <g transform="translate(60 130)">
+        <g transform="translate(60 130)" data-num="0">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="7" y="7" width="182" height="236" fill="none" stroke="#2b2118" stroke-opacity=".28" stroke-width="1"></rect>
           <path d="M16 180H180" stroke="#2b2118" stroke-width="2"></path>
@@ -50,7 +51,7 @@
         </g>
         <path d="M258 245v20M248 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(280 130)">
+        <g transform="translate(280 130)" data-num="1">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="7" y="7" width="182" height="236" fill="none" stroke="#2b2118" stroke-opacity=".28" stroke-width="1"></rect>
           <g transform="rotate(-3 98 120)">
@@ -65,7 +66,7 @@
         </g>
         <path d="M478 245v20M468 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(500 130)">
+        <g transform="translate(500 130)" data-num="2">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <path d="M8 243V216C14 214 46 180 80 168C106 159 130 190 146 142C154 118 170 124 188 116V243Z" fill="#ede1c4" stroke="#2b2118" stroke-opacity=".3" stroke-width="1.1"></path>
           <path d="M8 243V228C40 210 74 198 106 206C134 213 152 176 188 158V243Z" fill="#e6d9be" stroke="#2b2118" stroke-opacity=".25" stroke-width="1.1"></path>
@@ -103,7 +104,7 @@
         </g>
         <path d="M698 245v20M688 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(720 130)">
+        <g transform="translate(720 130)" data-num="3">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="16" y="52" width="164" height="166" fill="#dbe6e5"></rect>
           <rect x="16" y="52" width="164" height="80" fill="url(#pA-h)"></rect>
@@ -120,7 +121,7 @@
         </g>
         <path d="M918 245v20M908 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(940 130)">
+        <g transform="translate(940 130)" data-num="4">
           <rect width="196" height="250" fill="#dbe6e5"></rect>
           <rect width="196" height="250" fill="url(#pA-h)"></rect>
           <path d="M0 40H70L60 132L0 168Z" fill="#e3d2ae" stroke="#2b2118" stroke-width="2"></path>
@@ -179,7 +180,7 @@
         <text x="1140" y="72" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="15" letter-spacing="3" fill="#6b5943">RAADSEL B · III PLAATSEN</text>
         <path d="M60 92H1140" stroke="#2b2118" stroke-opacity=".45" stroke-width="1"></path>
 
-        <g transform="translate(60 130)">
+        <g transform="translate(60 130)" data-num="0">
           <rect width="320" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="7" y="7" width="306" height="236" fill="none" stroke="#2b2118" stroke-opacity=".28" stroke-width="1"></rect>
           <g transform="rotate(-3 160 118)">
@@ -194,7 +195,7 @@
         </g>
         <path d="M410 245v20M400 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(440 130)">
+        <g transform="translate(440 130)" data-num="1">
           <rect width="320" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <g transform="translate(120 62) scale(.3)"><path d="M-58,30 C-86,30 -86,-6 -60,-8 C-62,-36 -26,-48 -8,-28 C4,-54 52,-52 54,-16 C80,-18 88,30 58,30 Z" fill="#faf4e6" stroke="#2b2118" stroke-width="7" stroke-linejoin="round"></path></g>
           <g transform="translate(190 48) scale(.34)"><path d="M-58,30 C-86,30 -86,-6 -60,-8 C-62,-36 -26,-48 -8,-28 C4,-54 52,-52 54,-16 C80,-18 88,30 58,30 Z" fill="#faf4e6" stroke="#2b2118" stroke-width="7" stroke-linejoin="round"></path></g>
@@ -222,7 +223,7 @@
         </g>
         <path d="M790 245v20M780 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(820 130)">
+        <g transform="translate(820 130)" data-num="2">
           <rect width="320" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <g clip-path="url(#pB-p3)">
             <rect x="16" y="150" width="288" height="72" fill="#dbe6e5"></rect>
@@ -279,7 +280,7 @@
         <text x="1140" y="72" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="15" letter-spacing="3" fill="#6b5943">RAADSEL C · V PLAATSEN</text>
         <path d="M60 92H1140" stroke="#2b2118" stroke-opacity=".45" stroke-width="1"></path>
 
-        <g transform="translate(60 130)">
+        <g transform="translate(60 130)" data-num="0">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="16" y="118" width="164" height="88" fill="#dbe6e5"></rect>
           <rect x="16" y="118" width="164" height="88" fill="url(#pC2-h)"></rect>
@@ -308,7 +309,7 @@
         </g>
         <path d="M258 245v20M248 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(280 130)">
+        <g transform="translate(280 130)" data-num="1">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <polygon points="70,40 98,28 126,40 98,52" fill="#f6f2ea" stroke="#2b2118" stroke-width="1.8" stroke-linejoin="round"></polygon>
           <polygon points="70,40 70,70 98,82 98,52" fill="#dbe6e5" stroke="#2b2118" stroke-width="1.8" stroke-linejoin="round"></polygon>
@@ -331,7 +332,7 @@
         </g>
         <path d="M478 245v20M468 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(500 130)">
+        <g transform="translate(500 130)" data-num="2">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="7" y="7" width="182" height="236" fill="none" stroke="#2b2118" stroke-opacity=".28" stroke-width="1"></rect>
           <g stroke="#46697a" stroke-opacity=".55" stroke-width="1.6" stroke-linecap="round">
@@ -380,7 +381,7 @@
         </g>
         <path d="M698 245v20M688 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(720 130)">
+        <g transform="translate(720 130)" data-num="3">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="7" y="7" width="182" height="236" fill="none" stroke="#2b2118" stroke-opacity=".28" stroke-width="1"></rect>
           <path d="M64 54H132L124 158C122 180 112 192 98 192C84 192 74 180 72 158Z" fill="#2b2118"></path>
@@ -402,7 +403,7 @@
         </g>
         <path d="M918 245v20M908 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(940 130)">
+        <g transform="translate(940 130)" data-num="4">
           <rect width="196" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="7" y="7" width="182" height="236" fill="none" stroke="#2b2118" stroke-opacity=".28" stroke-width="1"></rect>
           <path d="M20 200C34 186 60 178 98 178C136 178 162 186 176 200Z" fill="#e3d2ae" stroke="#2b2118" stroke-width="2" stroke-linejoin="round"></path>
@@ -449,7 +450,7 @@
         <rect x="16" y="16" width="1168" height="668" fill="none" stroke="#2b2118" stroke-width="3"></rect>
         <rect x="26" y="26" width="1148" height="648" fill="none" stroke="#2b2118" stroke-opacity=".35" stroke-width="1"></rect>
         <text x="60" y="72" font-family="'EB Garamond',serif" font-size="26" font-weight="600" letter-spacing="6" fill="#2b2118">PLAAT IV</text>
-        <text x="1140" y="72" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="15" letter-spacing="3" fill="#6b5943">RAADSEL D · III PLAATSEN</text>
+        <text x="1140" y="72" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="15" letter-spacing="3" fill="#6b5943">RAADSEL D · II PLAATSEN</text>
         <path d="M60 92H1140" stroke="#2b2118" stroke-opacity=".45" stroke-width="1"></path>
 
         <!-- tekening iets kleiner en gecentreerd tussen de lijnen (y 92–600) -->
@@ -466,10 +467,14 @@
         <polygon points="684.0,399.1 658.0,409.1 658.0,389.1" fill="#2b2118"></polygon>
         <path d="M476.0 389.1V353.1" stroke="#2b2118" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="5 5"></path>
         <path d="M684.0 389.1V353.1" stroke="#2b2118" stroke-opacity=".45" stroke-width="1.6" stroke-dasharray="5 5"></path>
+        <g data-num="0">
         <rect x="422.0" y="307.1" width="108" height="46" fill="#f1e7d3" stroke="#2b2118" stroke-width="3"></rect>
         <text x="476.0" y="340.1" text-anchor="middle" font-family="'EB Garamond',serif" font-size="28" font-weight="600" letter-spacing="2" fill="#2b2118">MAR</text>
+        </g>
+        <g data-num="1">
         <rect x="622.0" y="307.1" width="124" height="46" fill="#f1e7d3" stroke="#2b2118" stroke-width="3"></rect>
         <text x="684.0" y="340.1" text-anchor="middle" font-family="'EB Garamond',serif" font-size="28" font-weight="600" letter-spacing="2" fill="#2b2118">TOGO</text>
+        </g>
         </g>
         </g>
 
@@ -504,7 +509,7 @@
         <text x="1140" y="72" text-anchor="end" font-family="'JetBrains Mono',monospace" font-size="15" letter-spacing="3" fill="#6b5943">RAADSEL E · II PLAATSEN</text>
         <path d="M60 92H1140" stroke="#2b2118" stroke-opacity=".45" stroke-width="1"></path>
 
-        <g transform="translate(220 130)">
+        <g transform="translate(220 130)" data-num="0">
           <rect width="320" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <image href="img/guatemala-wapen.png" x="136" y="13" width="49" height="46" preserveAspectRatio="xMidYMid meet"></image>
           <path d="M16 204H304" stroke="#2b2118" stroke-width="2"></path>
@@ -527,7 +532,7 @@
         </g>
         <path d="M600 245v20M590 255h20" stroke="#2b2118" stroke-opacity=".55" stroke-width="1.6"></path>
 
-        <g transform="translate(660 130)">
+        <g transform="translate(660 130)" data-num="1">
           <rect width="320" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <rect x="7" y="7" width="306" height="236" fill="none" stroke="#2b2118" stroke-opacity=".28" stroke-width="1"></rect>
           <g transform="rotate(-2 160 125)">

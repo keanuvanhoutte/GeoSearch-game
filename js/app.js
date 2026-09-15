@@ -4,6 +4,9 @@
   const CARDS = window.GeoCards;
   const FINAL = window.GeoFinalWord;
   const STORE_KEY = 'geosearch-v1';
+  const SPLIT_KEY = 'geosearch-split'; // breedte van de plaatkolom, door de speler versleept
+  const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
+  const SVG_NS = 'http://www.w3.org/2000/svg';
   // Elk raadsel start op dezelfde wereldkaart: het werelddeel zoekt de speler zelf.
   const START_VIEW = { center: [20, 10], zoom: 2 };
 
@@ -11,9 +14,12 @@
   const $ = (sel, root = document) => root.querySelector(sel);
 
   /* ---------- state ---------- */
+  // pts/res/given: per nummer (index = doel), null zolang dat nummer niet op de kaart staat.
+  // extra: vrije punten na de nummers, om een gesloten letter (D, O) langs de kust af te maken.
+  // seen: geopende hints ('g0' = algemene hint, 't2' = hint voor nummer III). sol: nummers waarvan de oplossing getoond is.
   function freshState() {
     const r = {};
-    RIDDLES.forEach((q) => { r[q.id] = { pts: [], res: [], hints: 0, found: false, revealed: false, letter: null }; });
+    RIDDLES.forEach((q) => { r[q.id] = { pts: [], res: [], given: [], extra: [], seen: [], sol: [], found: false, revealed: false, letter: null }; });
     return { lang: 'nl', r, final: false };
   }
   function loadState() {
@@ -23,19 +29,26 @@
       if (saved && saved.r) {
         base.lang = saved.lang === 'en' ? 'en' : 'nl';
         base.final = !!saved.final;
-        // oude punten (ook uit eerdere versies) nooit terugzetten
-        RIDDLES.forEach((q) => Object.assign(base.r[q.id], saved.r[q.id] || {}, { pts: [], res: [], found: false }));
+        RIDDLES.forEach((q) => {
+          const old = saved.r[q.id] || {};
+          const s = base.r[q.id];
+          s.letter = old.letter || null;
+          s.revealed = !!old.revealed;
+          // oudere versies bewaarden enkel een aantal hints: die beginnen opnieuw
+          if (Array.isArray(old.seen)) s.seen = old.seen.filter((k) => typeof k === 'string');
+          if (Array.isArray(old.sol)) s.sol = old.sol.filter((i) => Number.isInteger(i) && i >= 0 && i < q.targets.length);
+        });
       }
     } catch (e) { /* geen opslag beschikbaar */ }
     return base;
   }
   let state = loadState();
   // Geplaatste punten worden niet bewaard tussen bezoeken: een raadsel opent nooit met punten.
-  // Letters, hints en taal blijven wel bewaard.
+  // Letters, hints, getoonde oplossingen en taal blijven wel bewaard.
   const save = () => {
     try {
       const r = {};
-      Object.entries(state.r).forEach(([id, s]) => { r[id] = { ...s, pts: [], res: [], found: false }; });
+      Object.entries(state.r).forEach(([id, s]) => { r[id] = { ...s, pts: [], res: [], given: [], extra: [], found: false }; });
       localStorage.setItem(STORE_KEY, JSON.stringify({ ...state, r }));
     } catch (e) { /* ignore */ }
   };
@@ -94,6 +107,7 @@
 
   const SEARCH_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5L21 21"></path></svg>';
   const BULB_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6M10 21h4"></path><path d="M12 3a6 6 0 0 0-3.6 10.8c.7.6 1.1 1.3 1.1 2.2h5c0-.9.4-1.6 1.1-2.2A6 6 0 0 0 12 3z"></path></svg>';
+  const TRASH_ICON = '<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"></path></svg>';
 
   /* ---------- geo helpers ---------- */
   function distKm(a, b) {
@@ -112,22 +126,29 @@
     return Math.min(250, Math.round(12 * kmPerPx));
   }
 
-  /* Wijst elk geplaatst punt toe aan het doel waarvan het (relatief) het dichtst in een zone ligt.
-     Een punt is [lat, lng, extra km speling]. */
+  /* Beoordeelt de punten, in welke volgorde de speler ze ook plaatste. Een punt is [lat, lng, extra km speling].
+     Een punt op de juiste plek van een ander nummer krijgt het nummer van die plek.
+     order[nummer] = index van het punt dat daar komt · res[nummer] = ok (juist) / near (dichtbij) / miss (nog niet goed) */
   function evaluate(riddle, pts) {
-    const score = (p, tg) => Math.min(...tg.zones.map(([lat, lng, r]) => distKm(p, [lat, lng]) / (r + (p[2] || 0))));
-    const assigned = pts.map((p) => {
-      let best = null, bestScore = 1;
-      riddle.targets.forEach((tg, i) => {
-        const s = score(p, tg);
-        if (s < bestScore) { bestScore = s; best = i; }
-      });
-      return best;
+    const score = (p, j) => Math.min(...riddle.targets[j].zones.map(([lat, lng, r]) => distKm(p, [lat, lng]) / (r + (p[2] || 0))));
+    const order = pts.map((p, i) => (p && score(p, i) < 1 ? i : null)); // al juist bij het eigen nummer: blijft staan
+    const left = pts.map((p, i) => (p && order[i] === null ? i : -1)).filter((i) => i >= 0);
+    // de rest schuift naar een vrij nummer waarvan het op de plek ligt, de beste match eerst
+    const pairs = [];
+    left.forEach((i) => order.forEach((o, j) => { if (o === null && score(pts[i], j) < 1) pairs.push([score(pts[i], j), i, j]); }));
+    pairs.sort((a, b) => a[0] - b[0]).forEach(([, i, j]) => { if (order[j] === null && !order.includes(i)) order[j] = i; });
+    // punten die nergens juist liggen: eigen nummer als dat vrij is, anders het nummer dat een verschoven punt vrijmaakte
+    left.filter((i) => !order.includes(i)).forEach((i) => {
+      const k = order[i];
+      order[k === null ? i : order[k] === null ? k : order.indexOf(null)] = i;
     });
-    const found = new Set(assigned.filter((i) => i !== null));
-    const near = pts.map((p, k) => assigned[k] === null &&
-      riddle.targets.some((tg, i) => !found.has(i) && score(p, tg) < NEAR_FACTOR));
-    return { assigned, found, near };
+    const found = order.map((old, j) => old !== null && score(pts[old], j) < 1);
+    const res = order.map((old, j) => {
+      if (old === null) return null;
+      if (found[j]) return 'ok';
+      return riddle.targets.some((_, k) => !found[k] && score(pts[old], k) < NEAR_FACTOR) ? 'near' : 'miss';
+    });
+    return { order, res };
   }
 
   /* Leest "1/20/13/N/103/44/23/E", "1°20'13"N 103°44'23"E" of "1.337, 103.74". */
@@ -267,13 +288,13 @@
   /* ---------- zijbalk ---------- */
   // active: { type: 'home' } | { type: 'riddle', id, hintsHtml } | { type: 'final' }
   function sidebar(active) {
-    const upcoming = nextUnsolved(-1);
+    // Op het startscherm is "Start spel" de enige weg het spel in: daar geen raadsels of eindwoord in de zijbalk.
+    const home = active.type === 'home';
     const rows = RIDDLES.map((q) => {
       const s = state.r[q.id];
       const isActive = active.type === 'riddle' && active.id === q.id;
-      const isNext = active.type === 'home' && upcoming && upcoming.id === q.id;
-      const status = s.letter ? t('stSolved') : isActive ? t('stBusy') : isNext ? t('stNext') : '';
-      const cls = `${s.letter ? 'solved' : ''} ${isActive || isNext ? 'current' : ''}`;
+      const status = s.letter ? t('stSolved') : isActive ? t('stBusy') : '';
+      const cls = `${s.letter ? 'solved' : ''} ${isActive ? 'current' : ''}`;
       return `<a class="prow ${cls}" href="#/raadsel/${q.id}" ${isActive ? 'aria-current="page"' : ''}>
         <span class="pbadge">${s.letter || q.id}</span><span class="pname">${t('riddle')} ${q.id}</span>
         ${status ? `<span class="pstatus">${status}</span>` : ''}</a>`;
@@ -291,13 +312,14 @@
       <aside class="side">
         <div class="side-art" aria-hidden="true">${SIDE_ART}</div>
         <a class="brand" href="#/"><span class="brand-globe" aria-hidden="true"></span><span class="brand-name notranslate" translate="no">Geo<b>Search</b></span></a>
+        ${home ? '' : `
         <nav class="side-block" aria-label="${t('progress')}">
           <div class="side-label">${t('progress')}</div>
           <div class="prows">${rows}</div>
-        </nav>
+        </nav>`}
         ${active.hintsHtml || ''}
         <div class="side-bottom">
-          ${finalBtn}
+          ${home ? '' : finalBtn}
           <div class="side-foot">
             <button class="lang-pill" type="button" id="lang" aria-label="${t('langSwitch')}">${state.lang.toUpperCase()}</button>
             ${footLink}
@@ -320,23 +342,10 @@
 
   /* ---------- menu ---------- */
   function renderHome() {
-    const started = RIDDLES.some((q) => state.r[q.id].letter || state.r[q.id].hints);
     const upcoming = nextUnsolved(-1);
     const startHref = upcoming ? `#/raadsel/${upcoming.id}` : '#/finale';
     const steps = [1, 2, 3].map((n) => `
       <li><span class="step-num">${n}</span><div><b>${t(`how${n}t`)}</b><span class="step-text">${t(`how${n}`)}</span></div></li>`).join('');
-    const cards = RIDDLES.map((q) => {
-      const s = state.r[q.id];
-      const isNext = upcoming && upcoming.id === q.id;
-      const badge = s.letter
-        ? `<span class="badge ok">${t('solved')} · ${s.letter}</span>`
-        : isNext ? `<span class="badge next">${t('continueShort')} →</span>` : `<span class="badge">${t('open')}</span>`;
-      return `
-        <a class="rcard ${isNext ? 'next' : ''}" href="#/raadsel/${q.id}">
-          <div class="rcard-plate">${CARDS[q.id](state.lang)}</div>
-          <div class="rcard-foot"><span class="rcard-name">${t('riddle')} ${q.id}</span>${badge}</div>
-        </a>`;
-    }).join('');
 
     renderShell({ type: 'home' }, `
       <div class="home">
@@ -346,16 +355,9 @@
             <h1>${t('introHello')}</h1>
             <p class="lead">${t('intro')}</p>
           </div>
-          <a class="btn gold big" href="${startHref}">${started ? t('continue') : t('start')} →</a>
+          <a class="btn gold big" href="${startHref}">${t('start')} →</a>
         </div>
         <ol class="steps">${steps}</ol>
-        <div class="section-head"><h2>${t('riddles')}</h2><span>${t('solvedOf', { k: solvedCount(), n: RIDDLES.length })}</span></div>
-        <div class="rgrid">${cards}</div>
-        <a class="final-bar" href="#/finale">
-          <span class="fb-star" aria-hidden="true">★</span>
-          <span class="fb-text"><b>${t('finalTitle')}</b><small>${t('finalBarSub')}</small></span>
-          <span class="fb-word">${state.final ? FINAL : '→'}</span>
-        </a>
       </div>`, 'main-home');
   }
 
@@ -366,6 +368,62 @@
     // eerst lopende zoom-animaties stoppen, anders gooit Leaflet een fout na het verwijderen
     if (map) { map.stop(); map.remove(); map = null; }
   }
+  const refitMap = () => { if (map) map.invalidateSize({ debounceMoveend: true }); };
+
+  /* Versleepbare scheiding tussen plaat en kaart. De breedte blijft bewaard voor alle raadsels. */
+  const SPLIT_MIN = 300, MAP_MIN = 380;
+  function setupSplitter() {
+    const body = $('#rbody'), bar = $('#splitter');
+    let frame = 0;
+    const bounds = () => {
+      const cs = getComputedStyle(body);
+      const inner = body.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      return { left: body.getBoundingClientRect().left + parseFloat(cs.paddingLeft), max: Math.max(SPLIT_MIN, inner - bar.offsetWidth - MAP_MIN) };
+    };
+    const current = () => Math.round($('.rleft').getBoundingClientRect().width);
+    const apply = (px) => {
+      if (px) body.style.setProperty('--left', `${Math.round(Math.max(SPLIT_MIN, Math.min(px, bounds().max)))}px`);
+      else body.style.removeProperty('--left');
+      bar.setAttribute('aria-valuenow', String(current()));
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(refitMap);
+    };
+    const store = (px) => { try { if (px) localStorage.setItem(SPLIT_KEY, String(px)); else localStorage.removeItem(SPLIT_KEY); } catch (e) { /* ignore */ } };
+    let saved = 0;
+    try { saved = parseInt(localStorage.getItem(SPLIT_KEY), 10) || 0; } catch (e) { /* ignore */ }
+    bar.setAttribute('aria-valuemin', String(SPLIT_MIN));
+    apply(saved);
+
+    bar.addEventListener('pointerdown', (e) => {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      bar.setPointerCapture(e.pointerId);
+      const grab = e.clientX - bar.getBoundingClientRect().left;
+      const { left } = bounds();
+      document.body.classList.add('resizing');
+      const move = (ev) => apply(ev.clientX - grab - left);
+      const up = () => {
+        bar.removeEventListener('pointermove', move);
+        bar.removeEventListener('pointerup', up);
+        bar.removeEventListener('pointercancel', up);
+        document.body.classList.remove('resizing');
+        store(current());
+      };
+      bar.addEventListener('pointermove', move);
+      bar.addEventListener('pointerup', up);
+      bar.addEventListener('pointercancel', up);
+    });
+    // dubbelklik zet de standaardbreedte terug
+    bar.addEventListener('dblclick', () => { apply(0); store(0); });
+    bar.addEventListener('keydown', (e) => {
+      const step = e.shiftKey ? 80 : 30;
+      const next = { ArrowLeft: current() - step, ArrowRight: current() + step, Home: SPLIT_MIN, End: bounds().max }[e.key];
+      if (next === undefined) return;
+      e.preventDefault();
+      apply(next);
+      store(current());
+    });
+  }
 
   function renderRiddle(id) {
     const idx = RIDDLES.findIndex((q) => q.id === id);
@@ -373,7 +431,7 @@
     const q = RIDDLES[idx];
     const s = state.r[q.id];
     const prev = RIDDLES[idx - 1], next = RIDDLES[idx + 1];
-    const hints = q.hints[state.lang];
+    const general = q.hints[state.lang];
     const solved = !!s.letter;
 
     const hintsHtml = solved ? '' : `
@@ -396,13 +454,13 @@
           </div>
           <div class="success-actions">
             ${nq
-              ? `<a class="btn gold grow" href="#/raadsel/${nq.id}">${t('nextRiddle')} →</a><a class="btn outline" href="#/finale">${t('toFinal')}</a>`
+              ? `<a class="btn gold grow" href="#/raadsel/${nq.id}">${t('nextRiddle')} →</a>`
               : `<a class="btn gold grow" href="#/finale">${t('toFinal')} →</a>`}
           </div>
         </div>
         <div class="places-card">
           <div class="card-label">${t('foundPlaces')}</div>
-          <ol class="places">${q.targets.map((tg, i) => `<li><span>${i + 1}</span>${esc(tg.name[state.lang])}</li>`).join('')}</ol>
+          <ol class="places">${q.targets.map((tg, i) => `<li><span>${ROMAN[i]}</span>${esc(tg.name[state.lang])}</li>`).join('')}</ol>
         </div>`;
     } else {
       left = `
@@ -414,17 +472,13 @@
             <span class="hints-card-count" id="hints-card-count"></span>
             <button class="hints-close" type="button" id="hints-close" aria-label="${t('close')}" title="${t('close')}">✕</button>
           </div>
-          <p class="hints-empty" id="hints-empty">${t('hintsEmpty')}</p>
-          <div class="hint-view" id="hint-view" aria-live="polite">
-            <span class="hint-num" id="hint-num"></span>
-            <p class="hint-text" id="hint-text"></p>
+          <div class="hint-tabs" id="hint-tabs" role="tablist" aria-label="${t('hintsTitle')}">
+            <button class="hint-tab wide" type="button" role="tab" data-tab="g" aria-controls="hint-body">${t('tabGeneral')}</button>
+            ${q.targets.map((_, i) => `<button class="hint-tab" type="button" role="tab" data-tab="${i}" aria-controls="hint-body" aria-label="${t('pointN', { n: ROMAN[i] })}">${ROMAN[i]}</button>`).join('')}
           </div>
-          <div class="hint-nav" id="hint-nav">
-            <button class="sq-btn" type="button" id="hint-prev" aria-label="${t('prev')}">←</button>
-            <span class="hint-pos" id="hint-pos"></span>
-            <button class="sq-btn" type="button" id="hint-next" aria-label="${t('next')}">→</button>
-          </div>
-          <button class="btn dark hint-btn" type="button" id="hint-btn"></button>
+          <p class="hints-pick" id="hints-pick">${t('hintsPick')}</p>
+          <div class="hint-body" id="hint-body" role="tabpanel" aria-live="polite" hidden></div>
+          <button class="hint-full" type="button" id="solution">${t('showSolution')}</button>
         </section>
         <form class="answer-card" id="answer" autocomplete="off">
           <label class="answer-q" for="letter">${t('letterQ')}</label>
@@ -444,14 +498,14 @@
         </form>
       </div>
       <div class="map-bottom">
-        <span class="count-pill" id="count"></span>
+        <div class="num-tray" role="group" aria-label="${t('trayLabel')}">
+          ${q.targets.map((_, i) => `<button type="button" class="num-chip" data-chip="${i}" title="${t('chipHelp')}" aria-label="${t('pointN', { n: ROMAN[i] })}" aria-pressed="false">${ROMAN[i]}</button>`).join('')}
+        </div>
         <div class="tool-group">
           <button type="button" id="undo" title="${t('undo')}" aria-label="${t('undo')}">↶</button>
-          <button type="button" id="clear" title="${t('clear')}" aria-label="${t('clear')}">✕</button>
-          <button type="button" id="move" aria-pressed="false">✥ ${t('moveShort')}</button>
+          <button type="button" id="clear" title="${t('clear')}" aria-label="${t('clear')}">${TRASH_ICON}</button>
         </div>
         <span class="spacer"></span>
-        <button type="button" class="btn ghost-light" id="solution">${t('showSolution')}</button>
         <button type="button" class="btn gold" id="check">✓ ${t('checkPoints')}</button>
       </div>
       <div class="toast" id="toast" role="status" aria-live="polite"></div>`;
@@ -462,7 +516,7 @@
         <div class="rhead-text"><h1>${t('riddle')} ${q.id}</h1><p>${placesLine(q)}</p></div>
         <a class="sq-btn" href="${next ? `#/raadsel/${next.id}` : '#/finale'}" aria-label="${t('next')}">→</a>
       </div>
-      <div class="rbody">
+      <div class="rbody" id="rbody">
         <div class="rleft">
           <button class="plate-card" type="button" id="card" aria-label="${t('enlarge')}">
             ${CARDS[q.id](state.lang)}
@@ -470,6 +524,7 @@
           </button>
           ${left}
         </div>
+        <div class="splitter" id="splitter" role="separator" aria-orientation="vertical" tabindex="0" aria-label="${t('splitter')}" title="${t('splitter')}"><span></span></div>
         <div class="mapbox ${solved ? 'is-solved' : ''}">
           <div id="map"></div>
           ${controls}
@@ -477,79 +532,143 @@
       </div>`, 'main-riddle');
 
     $('#card').addEventListener('click', () => openLightbox(q.id));
+    setupSplitter();
+    const mapApi = setupMap(q, s, solved);
+    if (solved) return;
 
-    if (!solved) {
-      // Hints staan dicht achter de knop "Hints" in de zijbalk. Open verschijnen ze links
-      // in de vrije ruimte, op de plek van de uitleg. Er staat altijd maar één hint in beeld:
-      // bij het openen de laatst gekregen hint, eerdere hints zijn terug te lezen met ← →.
-      const hintBtn = $('#hint-btn'), view = $('#hint-view');
-      const toggle = $('#hints-toggle'), panel = $('#hints-panel'), howto = $('#howto');
-      let shown = s.hints - 1; // index van de hint die nu in beeld is
-      let cooling = false; // korte pauze na elke hint, zodat een dubbelklik geen twee hints geeft
-      const updateHints = (animate) => {
-        const n = Math.min(s.hints, hints.length);
-        shown = Math.max(0, Math.min(shown, n - 1));
-        const done = n >= hints.length;
-        hintBtn.disabled = done;
-        hintBtn.textContent = t(done ? 'noMoreHints' : 'hintBtn');
-        $('#hints-count').textContent = $('#hints-card-count').textContent = `${n}/${hints.length}`;
-        $('#hints-empty').hidden = n > 0;
-        view.hidden = n === 0;
-        $('#hint-nav').hidden = n < 2;
-        if (!n) return;
-        $('#hint-num').textContent = String(shown + 1).padStart(2, '0');
-        $('#hint-text').textContent = hints[shown];
-        $('#hint-pos').textContent = t('hintOf', { n: shown + 1, t: n });
-        $('#hint-prev').disabled = shown === 0;
-        $('#hint-next').disabled = shown === n - 1;
-        if (animate) { view.classList.remove('new'); void view.offsetWidth; view.classList.add('new'); }
-      };
-      const showHints = (open) => {
-        panel.hidden = !open;
-        howto.hidden = open;
-        toggle.setAttribute('aria-expanded', String(open));
-        if (open) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-      };
-      updateHints();
-      toggle.addEventListener('click', () => showHints(panel.hidden));
-      $('#hints-close').addEventListener('click', () => { showHints(false); toggle.focus(); });
-      hintBtn.addEventListener('click', () => {
-        if (cooling || s.hints >= hints.length) return;
-        s.hints++;
-        save();
-        shown = s.hints - 1;
-        cooling = true;
-        setTimeout(() => { cooling = false; }, 800);
-        updateHints(true);
+    /* Hints om uit te kiezen: wie op "Algemeen" of een nummer klikt, krijgt meteen die hint.
+       Lukt het met de hint van een nummer echt niet, dan kan de oplossing van enkel dat nummer getoond worden. */
+    const toggle = $('#hints-toggle'), panel = $('#hints-panel'), howto = $('#howto'), body = $('#hint-body');
+    let tab = null; // nog niets gekozen
+    let cooling = false; // korte pauze na elke klik, zodat een dubbelklik niet meteen de volgende stap geeft
+    const seen = (key) => s.seen.includes(key);
+    const unlock = (key) => { if (!seen(key)) { s.seen.push(key); save(); } };
+
+    // het vak van het gekozen nummer licht op in de plaat
+    const plateNums = [...document.querySelectorAll('#card [data-num]')].filter((g) => +g.dataset.num < q.targets.length);
+
+    function renderHints(animate) {
+      const count = general.filter((_, i) => seen(`g${i}`)).length + q.targets.filter((_, i) => seen(`t${i}`)).length;
+      $('#hints-count').textContent = $('#hints-card-count').textContent = `${count}/${general.length + q.targets.length}`;
+      panel.querySelectorAll('.hint-tab').forEach((el, k) => {
+        const key = el.dataset.tab, on = key === String(tab);
+        el.setAttribute('aria-selected', String(on));
+        el.tabIndex = on || (tab === null && k === 0) ? 0 : -1;
+        el.classList.toggle('seen', key === 'g' ? general.some((_, i) => seen(`g${i}`)) : seen(`t${key}`));
+        el.classList.toggle('sol', key !== 'g' && s.sol.includes(+key));
       });
-      // Enter ingedrukt houden herhaalt de klik niet
-      hintBtn.addEventListener('keydown', (e) => { if (e.repeat) e.preventDefault(); });
-      $('#hint-prev').addEventListener('click', () => { shown--; updateHints(true); });
-      $('#hint-next').addEventListener('click', () => { shown++; updateHints(true); });
-
-      $('#answer').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const input = $('#letter');
-        const val = input.value.trim().toUpperCase();
-        if (!val) return;
-        if (val === q.letter) {
-          s.letter = q.letter;
-          save();
-          renderRiddle(q.id);
-          celebrate($('.success-card'));
-        } else {
-          const status = $('#answer-status');
-          status.textContent = t('letterBad');
-          status.className = 'answer-status bad';
-          input.classList.remove('shake');
-          void input.offsetWidth;
-          input.classList.add('shake');
-          input.select();
+      plateNums.forEach((g) => {
+        const on = !panel.hidden && g.dataset.num === String(tab);
+        if (on && !g.querySelector('.num-hit')) {
+          const b = g.getBBox();
+          const hit = document.createElementNS(SVG_NS, 'rect');
+          hit.setAttribute('class', 'num-hit');
+          [['x', b.x - 8], ['y', b.y - 8], ['width', b.width + 16], ['height', b.height + 16]].forEach(([k, v]) => hit.setAttribute(k, v));
+          g.append(hit);
         }
+        g.classList.toggle('focus', on);
       });
+
+      $('#hints-pick').hidden = tab !== null;
+      body.hidden = tab === null;
+      if (tab === null) return;
+      if (tab === 'g') {
+        const open = general.filter((_, i) => seen(`g${i}`));
+        const more = general.some((_, i) => !seen(`g${i}`));
+        body.innerHTML = `
+          <ol class="hint-list">${open.map((h, i) => `<li><span class="hint-num">${String(i + 1).padStart(2, '0')}</span><p class="hint-text">${esc(h)}</p></li>`).join('')}</ol>
+          ${more ? `<button class="btn outline hint-more" type="button" data-act="general">${t('moreGeneral')}</button>` : ''}`;
+      } else {
+        const n = ROMAN[tab], tg = q.targets[tab];
+        body.innerHTML = `
+          <div class="hint-view"><span class="hint-num">${n}</span><p class="hint-text">${esc(tg.hint[state.lang])}</p></div>
+          ${s.sol.includes(tab)
+            ? `<div class="sol-box">
+                 <span class="card-label">${t('solNumTitle', { n })}</span>
+                 <b>${esc(tg.name[state.lang])}</b>
+                 <button class="btn outline" type="button" data-act="place">${t('putOnMap')}</button>
+               </div>`
+            : `<button class="btn outline hint-more" type="button" data-act="solution">${t('solNumBtn', { n })}</button>`}`;
+      }
+      if (animate) { body.classList.remove('new'); void body.offsetWidth; body.classList.add('new'); }
     }
 
-    setupMap(q, s, solved);
+    const showHints = (open) => {
+      panel.hidden = !open;
+      howto.hidden = open;
+      toggle.setAttribute('aria-expanded', String(open));
+      renderHints();
+      if (open) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    };
+    renderHints();
+    toggle.addEventListener('click', () => showHints(panel.hidden));
+    $('#hints-close').addEventListener('click', () => { showHints(false); toggle.focus(); });
+
+    const tabs = $('#hint-tabs');
+    const selectTab = (key, focus) => {
+      tab = key === 'g' ? 'g' : +key;
+      // kiezen is vragen: de eerste algemene hint of de hint van dat nummer komt meteen
+      if (tab === 'g') { if (!general.some((_, i) => seen(`g${i}`))) unlock('g0'); } else unlock(`t${tab}`);
+      cooling = true;
+      setTimeout(() => { cooling = false; }, 800);
+      renderHints(true);
+      if (focus) panel.querySelector(`.hint-tab[data-tab="${key}"]`).focus();
+    };
+    tabs.addEventListener('click', (e) => {
+      const el = e.target.closest('.hint-tab');
+      if (el) selectTab(el.dataset.tab);
+    });
+    tabs.addEventListener('keydown', (e) => {
+      const keys = ['g', ...q.targets.map((_, i) => String(i))];
+      const step = { ArrowLeft: -1, ArrowRight: 1 }[e.key];
+      if (!step) return;
+      e.preventDefault();
+      const cur = tab === null ? -1 : keys.indexOf(String(tab));
+      selectTab(keys[(cur + step + keys.length) % keys.length], true);
+    });
+
+    body.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-act]');
+      if (!btn || cooling) return;
+      const act = btn.dataset.act;
+      if (act === 'place') { mapApi.placeSolution(tab); return; }
+      if (act === 'general') {
+        const nextHint = general.findIndex((_, i) => !seen(`g${i}`));
+        if (nextHint < 0) return;
+        unlock(`g${nextHint}`);
+      } else if (act === 'solution') {
+        if (!s.sol.includes(tab)) { s.sol.push(tab); save(); }
+        mapApi.placeSolution(tab);
+      }
+      cooling = true;
+      setTimeout(() => { cooling = false; }, 800);
+      renderHints(true);
+      // met het toetsenbord blijft de focus in de hintkaart
+      if (e.detail === 0) { const f = body.querySelector('[data-act]'); if (f) f.focus(); }
+    });
+    // Enter ingedrukt houden herhaalt de klik niet
+    body.addEventListener('keydown', (e) => { if (e.repeat && e.target.closest('[data-act]')) e.preventDefault(); });
+
+    $('#answer').addEventListener('submit', (e) => {
+      e.preventDefault();
+      const input = $('#letter');
+      const val = input.value.trim().toUpperCase();
+      if (!val) return;
+      if (val === q.letter) {
+        s.letter = q.letter;
+        save();
+        renderRiddle(q.id);
+        celebrate($('.success-card'));
+      } else {
+        const status = $('#answer-status');
+        status.textContent = t('letterBad');
+        status.className = 'answer-status bad';
+        input.classList.remove('shake');
+        void input.offsetWidth;
+        input.classList.add('shake');
+        input.select();
+      }
+    });
   }
 
   function setupMap(q, s, solved) {
@@ -564,7 +683,7 @@
       worldCopyJump: false,
     });
     L.control.zoom({ position: 'topright', zoomInTitle: '+', zoomOutTitle: '−' }).addTo(map);
-    const self = map; // na een zoekopdracht: zit de speler nog op deze kaart?
+    const self = map; // na een zoekopdracht of dialoog: zit de speler nog op deze kaart?
 
     // satellietbeeld met daarboven altijd de landsgrenzen en namen (geen knoppen om te wisselen)
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -592,7 +711,7 @@
       q.targets.forEach((tg, i) => {
         const m = L.marker(tg.point, {
           keyboard: false,
-          icon: L.divIcon({ className: '', html: `<span class="sol-pin">${i + 1}</span>`, iconSize: [30, 30], iconAnchor: [15, 15] }),
+          icon: L.divIcon({ className: '', html: `<span class="sol-pin">${ROMAN[i]}</span>`, iconSize: [30, 30], iconAnchor: [15, 15] }),
         }).addTo(solutionLayer);
         m.bindTooltip(esc(tg.name[state.lang]), { permanent: withLabels, direction: 'right', offset: [14, 0], className: 'sol-tip' });
       });
@@ -604,13 +723,17 @@
     if (solved) {
       // opgelost raadsel: toon de gouden lijn, zonder bedieningsknoppen
       setTimeout(() => { if (map) { map.invalidateSize(); drawSolution(false, false); } }, 60);
-      return;
+      return null;
     }
 
+    const N = q.targets.length;
+    if (s.pts.length !== N) { s.pts = Array(N).fill(null); s.res = Array(N).fill(null); s.given = []; s.extra = []; }
     const drawn = L.layerGroup().addTo(map);
     const searchLayer = L.layerGroup().addTo(map);
-    let moving = false; // verplaatsmodus: kaartklikken plaatsen geen nieuwe punten
-    let selected = null; // in verplaatsmodus aangetikt punt dat naar de volgende kaartklik gaat
+    const history = []; // toestand vóór elke wijziging, voor ↶
+    let extraTold = false; // uitleg over extra punten één keer per bezoek
+    let chosen = null; // aangeklikt nummer (nog niet op de kaart) dat bij de volgende kaartklik geplaatst wordt
+    let dragged = false; // net een nummer gesleept: de klik die daarop volgt kiest geen nummer
 
     const toast = (msg, kind = 'info') => {
       const el = $('#toast');
@@ -620,88 +743,267 @@
       clearTimeout(toast.timer);
       toast.timer = setTimeout(() => el.classList.remove('show'), 6500);
     };
+    const hideToast = () => { const el = $('#toast'); if (el) el.classList.remove('show'); };
+
+    const placed = () => s.pts.map((p, i) => (p ? i : -1)).filter((i) => i >= 0);
+    const firstFree = () => s.pts.findIndex((p) => !p);
+    const allPlaced = () => firstFree() < 0;
+    const lineClosed = () => {
+      const last = s.extra[s.extra.length - 1], start = s.pts[0];
+      return !!(last && start && last[0] === start[0] && last[1] === start[1]);
+    };
+    const remember = () => {
+      history.push({ pts: s.pts.map((p) => p && [...p]), res: [...s.res], given: [...s.given], extra: s.extra.map((p) => [...p]) });
+      if (history.length > 100) history.shift();
+    };
 
     function redraw() {
       drawn.clearLayers();
-      if (s.pts.length > 1) {
-        L.polyline(s.pts, { color: '#0b1a2c', weight: 6, opacity: 0.45, interactive: false }).addTo(drawn);
-        L.polyline(s.pts, { color: '#ff6b4a', weight: 3, interactive: false }).addTo(drawn);
-      }
+      /* Volle lijnen enkel tussen opeenvolgende nummers; ontbreekt er een nummer, dan is er daar geen lijn.
+         Extra punten trekken de lijn verder vanaf het laatste nummer, zodra alle nummers staan. */
+      const nodeLL = (nd) => (nd.extra ? s.extra[nd.i] : s.pts[nd.i]);
+      const groups = [[]];
       s.pts.forEach((p, i) => {
-        let cls = s.res[i] || ''; // kleur van de laatste controle: ok / near / miss
-        if (moving) cls += ' movable';
-        if (selected === i) cls += ' selected';
-        const marker = L.marker(p, {
-          draggable: moving,
-          keyboard: false,
-          zIndexOffset: selected === i ? 1000 : 0,
-          icon: L.divIcon({ className: '', html: `<span class="pin ${cls}">${i + 1}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }),
-        }).addTo(drawn);
-        marker.on('dragend', () => {
-          const ll = marker.getLatLng();
-          movePoint(i, ll.lat, ll.lng);
-        });
-        marker.on('click', () => {
-          if (!moving) return;
-          selected = selected === i ? null : i;
-          redraw();
-          if (selected !== null) toast(t('moveSelected', { n: i + 1 }));
-        });
+        if (p) groups[groups.length - 1].push({ extra: false, i });
+        else groups.push([]);
       });
-      const n = s.pts.length;
-      $('#count').textContent = n === 1 ? t('point1') : t('points', { n });
+      if (!allPlaced()) groups.push([]);
+      s.extra.forEach((_, i) => groups[groups.length - 1].push({ extra: true, i }));
+      const segs = groups.filter((g) => g.length > 1).map((nodes) => {
+        const ll = nodes.map(nodeLL);
+        return { nodes, lines: [
+          L.polyline(ll, { color: '#0b1a2c', weight: 6, opacity: 0.45, interactive: false }).addTo(drawn),
+          L.polyline(ll, { color: '#ff6b4a', weight: 3, lineJoin: 'round', interactive: false }).addTo(drawn),
+        ] };
+      });
+      // de lijnen bewegen mee tijdens het slepen
+      const follow = (nd, marker) => () => segs.forEach((sg) => {
+        if (!sg.nodes.some((x) => x.extra === nd.extra && x.i === nd.i)) return;
+        const ll = sg.nodes.map((x) => (x.extra === nd.extra && x.i === nd.i ? marker.getLatLng() : nodeLL(x)));
+        sg.lines.forEach((l) => l.setLatLngs(ll));
+      });
+
+      placed().forEach((i) => {
+        const cls = [s.res[i] || '', s.given.includes(i) ? 'given' : ''].join(' ');
+        const marker = L.marker(s.pts[i], {
+          draggable: true,
+          keyboard: false,
+          riseOnHover: true,
+          zIndexOffset: 500,
+          icon: L.divIcon({ className: '', html: `<span class="pin ${cls}">${ROMAN[i]}</span>`, iconSize: [30, 30], iconAnchor: [15, 15] }),
+        }).addTo(drawn);
+        marker.on('dragstart', () => { map.closePopup(); hideToast(); });
+        marker.on('drag', follow({ extra: false, i }, marker));
+        marker.on('dragend', () => { const ll = marker.getLatLng(); setPoint(i, ll.lat, ll.lng); });
+        marker.on('click', () => openPinMenu(false, i, marker));
+      });
+      s.extra.forEach((p, i) => {
+        const marker = L.marker(p, {
+          draggable: true,
+          keyboard: false,
+          icon: L.divIcon({ className: '', html: '<span class="pin extra"></span>', iconSize: [16, 16], iconAnchor: [8, 8] }),
+        }).addTo(drawn);
+        marker.on('dragstart', () => { map.closePopup(); hideToast(); });
+        marker.on('drag', follow({ extra: true, i }, marker));
+        marker.on('dragend', () => moveExtra(i, marker.getLatLng()));
+        marker.on('click', () => openPinMenu(true, i, marker));
+      });
+
+      if (chosen !== null && s.pts[chosen]) chosen = null;
+      document.querySelectorAll('.num-chip[data-chip]').forEach((el) => {
+        const i = +el.dataset.chip;
+        el.className = `num-chip ${s.pts[i] ? 'placed' : ''} ${s.res[i] || ''} ${chosen === i ? 'chosen' : ''}`;
+        el.setAttribute('aria-pressed', String(chosen === i));
+      });
+      $('#undo').disabled = !history.length;
+      $('#clear').disabled = !placed().length && !s.extra.length;
     }
 
     // Andere punten houden hun kleur; enkel een nieuw of verplaatst punt is nog niet gecontroleerd.
     const pointAt = (lat, lng) => [round(lat), round(lng), clickTolKm(lat, map.getZoom())];
 
-    function addPoint(lat, lng) {
-      s.pts.push(pointAt(lat, lng));
-      s.res.splice(s.pts.length - 1);
-      redraw();
-    }
-
-    function movePoint(i, lat, lng) {
+    function setPoint(i, lat, lng) {
+      remember();
       s.pts[i] = pointAt(lat, lng);
       s.res[i] = null;
-      selected = null;
+      s.given = s.given.filter((j) => j !== i);
+      if (chosen === i) { chosen = null; hideToast(); }
       redraw();
     }
 
-    function setMoving(on) {
-      moving = on;
-      selected = null;
-      const btn = $('#move');
-      btn.classList.toggle('on', on);
-      btn.setAttribute('aria-pressed', String(on));
-      btn.textContent = on ? `✓ ${t('moveDoneShort')}` : `✥ ${t('moveShort')}`;
-      $('#map').classList.toggle('moving', on);
+    // Een nummer dat nog niet op de kaart staat kiezen: de volgende klik op de kaart zet dat nummer.
+    function choose(i) {
+      if (s.pts[i]) return; // staat al op de kaart: verslepen volstaat
+      chosen = chosen === i ? null : i;
       redraw();
-      if (on) toast(t('moveHelp'));
+      if (chosen !== null) toast(t('chosen', { n: ROMAN[i] }));
+      else hideToast();
     }
 
+    // Een extra punt vlak bij punt I (tot 24 px) komt precies op punt I: zo sluit de lijn netjes.
+    function snap(ll) {
+      const start = s.pts[0];
+      if (start && map.latLngToContainerPoint(ll).distanceTo(map.latLngToContainerPoint(start)) <= 24) return [start[0], start[1]];
+      return [round(ll.lat), round(ll.lng)];
+    }
+    function addExtra(ll) {
+      remember();
+      s.extra.push(snap(ll));
+      redraw();
+      if (!extraTold && !lineClosed()) { extraTold = true; toast(t('extraPlaced')); }
+    }
+    function moveExtra(i, ll) {
+      remember();
+      s.extra[i] = snap(ll);
+      redraw();
+    }
+
+    function removePoint(extra, i) {
+      remember();
+      if (extra) s.extra.splice(i, 1);
+      else {
+        s.pts[i] = null;
+        s.res[i] = null;
+        s.given = s.given.filter((j) => j !== i);
+      }
+      redraw();
+    }
+
+    function closeLine() {
+      remember();
+      s.extra.push([s.pts[0][0], s.pts[0][1]]);
+      redraw();
+    }
+
+    // Oplossing van één nummer: het punt komt op de juiste plek en de kaart vliegt erheen.
+    function placeSolution(i) {
+      if (map !== self) return;
+      const [lat, baseLng] = q.targets[i].point;
+      // zelfde wereldkopie als het dichtstbijzijnde nummer, zodat de lijn niet rond de aarde loopt
+      const near = placed().filter((j) => j !== i).sort((a, b) => Math.abs(a - i) - Math.abs(b - i))[0];
+      const lng = near === undefined ? baseLng : baseLng + 360 * Math.round((s.pts[near][1] - baseLng) / 360);
+      remember();
+      s.pts[i] = [lat, lng, 0];
+      s.res[i] = 'ok';
+      if (!s.given.includes(i)) s.given.push(i);
+      redraw();
+      map.flyTo([lat, lng], Math.min(Math.max(map.getZoom(), 4), 6), { duration: 1.2 });
+      toast(t('solPlaced', { n: ROMAN[i] }), 'good');
+    }
+
+    function openPinMenu(extra, i, marker) {
+      const canClose = !extra && i === 0 && q.coast && s.extra.length && allPlaced() && !lineClosed();
+      const menu = document.createElement('div');
+      menu.className = 'pin-pop';
+      menu.innerHTML = `<b>${extra ? t('extraPoint') : t('pointN', { n: ROMAN[i] })}</b>
+        ${canClose ? `<button type="button" class="btn gold" data-act="close">✓ ${t('closeLine')}</button>` : ''}
+        <button type="button" class="btn outline" data-act="remove">✕ ${t('remove')}</button>`;
+      menu.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-act]');
+        if (!btn) return;
+        map.closePopup();
+        if (btn.dataset.act === 'close') closeLine();
+        else removePoint(extra, i);
+      });
+      L.popup({ className: 'search-popup', offset: [0, extra ? -6 : -12], closeButton: false, autoPan: false })
+        .setLatLng(marker.getLatLng()).setContent(menu).openOn(map);
+    }
+
+    // Klik op de kaart: het gekozen nummer, anders het eerste vrije, daarna (bij een kust) extra punten.
+    // De volgorde maakt niet uit: bij het controleren krijgt een juiste plek het nummer van haar vak.
     map.on('click', (e) => {
-      if (!moving) { addPoint(e.latlng.lat, e.latlng.lng); return; }
-      if (selected !== null) movePoint(selected, e.latlng.lat, e.latlng.lng);
-      else toast(t('moveHelp'));
+      const i = chosen !== null ? chosen : firstFree();
+      if (i >= 0) setPoint(i, e.latlng.lat, e.latlng.lng);
+      else if (q.coast) addExtra(e.latlng);
+      else toast(t('allPlaced'), 'plain');
     });
 
-    $('#undo').addEventListener('click', () => { s.pts.pop(); s.res.splice(s.pts.length); selected = null; redraw(); });
-    $('#clear').addEventListener('click', () => { s.pts = []; s.res = []; selected = null; redraw(); });
-    $('#move').addEventListener('click', () => {
-      if (!moving && !s.pts.length) { toast(t('placeFirst'), 'plain'); return; }
-      setMoving(!moving);
+    /* Nummers slepen van de balk onder de kaart, rechtstreeks op de kaart. */
+    const overMap = (ev) => {
+      const el = document.elementFromPoint(ev.clientX, ev.clientY);
+      return !!el && !!el.closest('#map') && !el.closest('.leaflet-control');
+    };
+    function dragNumber(e, i, source) {
+      if (e.button !== 0) return;
+      e.preventDefault();
+      const x0 = e.clientX, y0 = e.clientY;
+      let ghost = null;
+      const move = (ev) => {
+        if (ev.pointerId !== e.pointerId) return;
+        if (!ghost) {
+          if (Math.hypot(ev.clientX - x0, ev.clientY - y0) < 6) return; // nog maar een klik
+          ghost = document.createElement('span');
+          ghost.className = 'pin drag-ghost';
+          ghost.textContent = ROMAN[i];
+          document.body.appendChild(ghost);
+          source.classList.add('dragging');
+          document.body.classList.add('dragging-num');
+          map.closePopup();
+          hideToast();
+        }
+        ghost.style.left = `${ev.clientX}px`;
+        ghost.style.top = `${ev.clientY}px`;
+        ghost.classList.toggle('over', overMap(ev));
+      };
+      const end = (ev) => {
+        if (ev.pointerId !== e.pointerId) return;
+        window.removeEventListener('pointermove', move);
+        window.removeEventListener('pointerup', end);
+        window.removeEventListener('pointercancel', end);
+        if (!ghost) return;
+        ghost.remove();
+        source.classList.remove('dragging');
+        document.body.classList.remove('dragging-num');
+        dragged = true;
+        setTimeout(() => { dragged = false; }, 0);
+        if (ev.type === 'pointerup' && map === self && overMap(ev)) {
+          const ll = map.mouseEventToLatLng(ev);
+          setPoint(i, ll.lat, ll.lng);
+        }
+      };
+      window.addEventListener('pointermove', move);
+      window.addEventListener('pointerup', end);
+      window.addEventListener('pointercancel', end);
+    }
+    document.querySelectorAll('.num-chip[data-chip]').forEach((el) => {
+      el.addEventListener('pointerdown', (e) => dragNumber(e, +el.dataset.chip, el));
+      el.addEventListener('click', () => { if (!dragged) choose(+el.dataset.chip); });
+    });
+
+    $('#undo').addEventListener('click', () => {
+      const prev = history.pop();
+      if (!prev) return;
+      Object.assign(s, prev);
+      map.closePopup();
+      redraw();
+    });
+
+    $('#clear').addEventListener('click', async () => {
+      if (!placed().length && !s.extra.length) return;
+      const ok = await askConfirm({ title: t('clearTitle'), text: t('clearText'), cancel: t('cancel'), ok: t('clearOk'), danger: true });
+      if (!ok || map !== self) return;
+      remember();
+      s.pts = Array(N).fill(null);
+      s.res = Array(N).fill(null);
+      s.given = [];
+      s.extra = [];
+      redraw();
     });
 
     $('#check').addEventListener('click', () => {
-      if (!s.pts.length) { toast(t('placeFirst'), 'plain'); return; }
-      const ev = evaluate(q, s.pts);
-      s.res = s.pts.map((_, i) => (ev.assigned[i] !== null ? 'ok' : ev.near[i] ? 'near' : 'miss'));
-      selected = null;
+      if (!placed().length) { toast(t('placeFirst'), 'plain'); return; }
+      const { order, res } = evaluate(q, s.pts);
+      const renumbered = order.some((old, j) => old !== null && old !== j);
+      if (renumbered) {
+        remember(); // met ↶ komen de oude nummers terug
+        const pts = s.pts;
+        s.pts = order.map((old) => (old === null ? null : pts[old]));
+        s.given = s.given.map((old) => order.indexOf(old)).filter((j) => j >= 0);
+      }
+      s.res = res;
       redraw();
-      // optionele doelen (zoals Mali) kleuren wel groen, maar tellen niet mee
-      const required = q.targets.map((tg, i) => (tg.optional ? null : i)).filter((i) => i !== null);
-      const f = required.filter((i) => ev.found.has(i)).length, total = required.length;
+      // extra punten worden niet beoordeeld
+      const f = res.filter((r) => r === 'ok').length, total = N;
       const line = $('#answer-status');
       if (f === total) {
         s.found = true;
@@ -712,20 +1014,24 @@
         if (window.matchMedia('(pointer: fine)').matches) $('#letter').focus({ preventScroll: true });
         return;
       }
-      // één melding met alles: hoeveel plekken, en wat oranje en grijs betekenen
-      const nearCount = s.res.filter((r) => r === 'near').length;
-      const missCount = s.res.filter((r) => r === 'miss').length;
-      const msg = [t('found', { f, t: total }), nearCount ? t('nearPts') : '', missCount ? t('missPts') : '']
-        .filter(Boolean).join(' ');
+      // één melding met alles: hoeveel plekken, en wat de kleuren betekenen
+      const count = (r) => s.res.filter((x) => x === r).length;
+      const msg = [
+        t('found', { f, t: total }),
+        renumbered ? t('renumbered') : '',
+        count('near') ? t('nearPts') : '',
+        count('miss') ? t('missPts') : '',
+        s.pts.some((p) => !p) ? t('notPlaced') : '',
+      ].filter(Boolean).join(' ');
       line.textContent = msg;
       line.className = 'answer-status';
-      toast(msg, nearCount ? 'near' : f ? 'good' : 'plain');
+      toast(msg, count('near') ? 'near' : f ? 'good' : 'plain');
     });
 
     $('#solution').addEventListener('click', async () => {
       if (!s.revealed) {
         const ok = await askConfirm({ title: t('solutionTitle'), text: t('solutionText'), cancel: t('solutionCancel'), ok: t('showSolution') });
-        if (!ok || !map) return;
+        if (!ok || map !== self) return;
       }
       s.revealed = true;
       save();
@@ -733,7 +1039,7 @@
       toast(t('revealed'));
     });
 
-    // Zoekresultaat: vlieg erheen en toon een gouden ring. De speler beslist zelf of daar een punt komt.
+    // Zoekresultaat: vlieg erheen en toon een gouden ring. De speler kiest zelf welk nummer daar komt.
     function showResult(hit) {
       // kies de wereldkopie die het dichtst bij het huidige beeld ligt, zodat lijnen niet rond de aarde lopen
       const shift = 360 * Math.round((map.getCenter().lng - hit.lng) / 360);
@@ -741,17 +1047,22 @@
       searchLayer.clearLayers();
       const pop = document.createElement('div');
       pop.className = 'search-pop';
-      pop.innerHTML = `<b>${esc(hit.name)}</b><button type="button" class="btn gold">+ ${t('placeHere')}</button>`;
-      pop.querySelector('button').addEventListener('click', () => {
-        if (moving && selected !== null) movePoint(selected, lat, lng);
-        else addPoint(lat, lng);
-        searchLayer.clearLayers();
-      });
+      const fillPop = () => {
+        const suggest = chosen !== null ? chosen : firstFree();
+        pop.innerHTML = `<b>${esc(hit.name)}</b><span class="pop-label">${t('placeAs')}</span>
+          <div class="pop-nums">${q.targets.map((_, i) => `<button type="button" class="num-chip ${s.pts[i] ? 'placed' : ''} ${i === suggest ? 'suggest' : ''}" data-i="${i}" aria-label="${t('pointN', { n: ROMAN[i] })}">${ROMAN[i]}</button>`).join('')}</div>`;
+        pop.querySelectorAll('[data-i]').forEach((btn) => btn.addEventListener('click', () => {
+          setPoint(+btn.dataset.i, lat, lng);
+          searchLayer.clearLayers();
+        }));
+      };
+      fillPop();
       const marker = L.marker([lat, lng], {
         keyboard: false,
         icon: L.divIcon({ className: '', html: '<span class="search-pin"></span>', iconSize: [36, 36], iconAnchor: [18, 18] }),
       }).addTo(searchLayer);
-      marker.bindPopup(pop, { className: 'search-popup', offset: [0, -14], minWidth: 190 });
+      marker.bindPopup(pop, { className: 'search-popup', offset: [0, -14], minWidth: Math.max(190, N * 42 + 8) });
+      marker.on('popupopen', fillPop);
 
       const b = hit.bounds;
       if (b && b[1][0] - b[0][0] < 40 && b[1][1] - b[0][1] < 60) {
@@ -790,6 +1101,7 @@
     // Een raadsel opent altijd op de wereldkaart: geen zoom naar eerdere punten en geen oplossing.
     redraw();
     setTimeout(() => map && map.invalidateSize(), 60);
+    return { placeSolution };
   }
 
   const round = (v) => Math.round(v * 10000) / 10000;

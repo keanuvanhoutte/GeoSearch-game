@@ -7,8 +7,10 @@ Een geografische puzzel: trek lijnen op de wereldkaart en ontdek de letters die 
 ## Zo werkt het
 
 1. Bekijk de plaat van een raadsel: vlaggen, tekeningen en symbolen wijzen naar plekken op aarde.
-2. Klik die plekken aan op de kaart. De punten worden verbonden tot een letter.
+2. Klik die plekken aan op de kaart, in elke volgorde. Bij het controleren krijgt elke juiste plek het nummer van haar vak (I, II, III…) en worden de punten verbonden tot een letter.
 3. Vul de letter in. Met de vijf letters vind je het eindwoord.
+
+Vast? Kies zelf een hint: over het hele raadsel of voor één nummer. Lukt het echt niet, dan kun je per nummer de oplossing tonen. De scheiding tussen plaat en kaart is te verslepen.
 
 Werkt op computer en gsm. Het satellietbeeld en het zoeken van plekken hebben internet nodig.
 

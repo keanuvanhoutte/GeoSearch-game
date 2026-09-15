@@ -2,7 +2,8 @@
    targets: in de volgorde waarin de lijn de letter tekent. Elk doel heeft een exact punt
    (voor de oplossingslijn) en zones [lat, lng, straal in km] waarbinnen een punt goed telt.
    De stralen zijn ruim gekozen: een gok in de buurt van de juiste plek telt ook.
-   optional: kleurt groen als de speler het vindt, maar is niet verplicht.
+   Het nummer van een doel (I, II, III…) is het vak op de plaat; de speler kiest zelf in welke volgorde hij ze plaatst.
+   hint: de hint voor dat ene nummer. hints: algemene hints over het hele raadsel.
    coast: kustlijn van het laatste doel terug naar het eerste, die de letter afmaakt. */
 window.GeoRiddles = [
   {
@@ -11,36 +12,42 @@ window.GeoRiddles = [
     position: 1,
     targets: [
       { key: 'everest', name: { nl: 'Mount Everest', en: 'Mount Everest' },
-        point: [27.988, 86.925], zones: [[27.988, 86.925, 500]] },
+        point: [27.988, 86.925], zones: [[27.988, 86.925, 500]],
+        hint: {
+          nl: 'Een berg met een pijl omhoog en MAX. Het hoogste punt op aarde.',
+          en: 'A mountain with an arrow up and MAX. The highest point on earth.',
+        } },
       { key: 'singapore', name: { nl: '1/20/13/N/103/44/23/E (Singapore)', en: '1/20/13/N/103/44/23/E (Singapore)' },
-        point: [1.337, 103.740], zones: [[1.337, 103.740, 500]] },
+        point: [1.337, 103.740], zones: [[1.337, 103.740, 500]],
+        hint: {
+          nl: 'Coördinaten in graden/minuten/seconden. Typ ze in het zoekvak boven de kaart.',
+          en: 'Coordinates in degrees/minutes/seconds. Type them into the search box above the map.',
+        } },
       // de hele Muur telt: van Shanhaiguan aan zee tot het westelijke fort Jiayuguan
       { key: 'greatwall', name: { nl: 'Chinese Muur', en: 'Great Wall of China' },
         point: [40.4345, 116.5606],
         zones: [[40.4345, 116.5606, 500], [40.0, 119.75, 300], [40.2, 113.0, 350], [38.3, 109.7, 350],
-          [38.5, 106.3, 300], [38.0, 102.6, 300], [39.8, 98.2, 300]] },
+          [38.5, 106.3, 300], [38.0, 102.6, 300], [39.8, 98.2, 300]],
+        hint: {
+          nl: 'Een kronkelende muur met wachttorens en een rode vlag met gele sterren. Een wereldberoemd bouwwerk.',
+          en: 'A winding wall with watchtowers and a red flag with yellow stars. A world-famous structure.',
+        } },
       { key: 'mariana', name: { nl: 'Marianentrog', en: 'Mariana Trench' },
-        point: [11.35, 142.2], zones: [[11.35, 142.2, 600], [14.5, 146.5, 500], [19.5, 147.5, 500]] },
+        point: [11.35, 142.2], zones: [[11.35, 142.2, 600], [14.5, 146.5, 500], [19.5, 147.5, 500]],
+        hint: {
+          nl: 'De pijl wijst tot onder de zeebodem, met MIN. Het diepste punt van de zee.',
+          en: 'The arrow points below the sea floor, with MIN. The deepest point of the sea.',
+        } },
       { key: 'diomede', name: { nl: 'Diomedeseilanden', en: 'Diomede Islands' },
-        point: [65.78, 191.0], zones: [[65.78, -169.0, 500]] },
+        point: [65.78, 191.0], zones: [[65.78, -169.0, 500]],
+        hint: {
+          nl: 'Het rode kruis ligt in de zeestraat tussen twee kusten. Links de Russische vlag, rechts die van Alaska.',
+          en: 'The red cross sits in the strait between two coasts. The Russian flag on the left, Alaska on the right.',
+        } },
     ],
     hints: {
-      nl: [
-        'Vijf vakken, vijf plekken. De nummers I tot V zijn de volgorde waarin je de lijn trekt.',
-        'Vak I: een berg met een pijl omhoog en MAX. Het hoogste punt op aarde.',
-        'Vak II: coördinaten in graden/minuten/seconden. Typ ze in het zoekvak boven de kaart.',
-        'Vak III: een kronkelende muur met wachttorens en een rode vlag met gele sterren. Een wereldberoemd bouwwerk.',
-        'Vak IV: de pijl wijst tot onder de zeebodem, met MIN. Het diepste punt van de zee.',
-        'Vak V: het rode kruis ligt in de zeestraat tussen twee kusten. Links de Russische vlag, rechts die van Alaska.',
-      ],
-      en: [
-        'Five panels, five places. The numbers I to V are the order in which you draw the line.',
-        'Panel I: a mountain with an arrow up and MAX. The highest point on earth.',
-        'Panel II: coordinates in degrees/minutes/seconds. Type them into the search box above the map.',
-        'Panel III: a winding wall with watchtowers and a red flag with yellow stars. A world-famous structure.',
-        'Panel IV: the arrow points below the sea floor, with MIN. The deepest point of the sea.',
-        'Panel V: the red cross sits in the strait between two coasts. The Russian flag on the left, Alaska on the right.',
-      ],
+      nl: ['Vijf vakken, vijf plekken. De lijn loopt van I naar V, maar je mag de nummers in elke volgorde plaatsen.'],
+      en: ['Five panels, five places. The line runs from I to V, but you can place the numbers in any order.'],
     },
   },
   {
@@ -49,25 +56,27 @@ window.GeoRiddles = [
     position: 4,
     targets: [
       { key: 'kakadu', name: { nl: '13/16/21/S/132/50/24/E (Jim Jim Falls, Kakadu)', en: '13/16/21/S/132/50/24/E (Jim Jim Falls, Kakadu)' },
-        point: [-13.2726, 132.8399], zones: [[-13.2726, 132.8399, 400]] },
+        point: [-13.2726, 132.8399], zones: [[-13.2726, 132.8399, 400]],
+        hint: {
+          nl: 'Coördinaten: typ ze in het zoekvak boven de kaart. Je komt uit bij een waterval.',
+          en: 'Coordinates: type them into the search box above the map. You will end up at a waterfall.',
+        } },
       { key: 'uluru', name: { nl: 'Uluru (Ayers Rock)', en: 'Uluru (Ayers Rock)' },
-        point: [-25.345, 131.036], zones: [[-25.345, 131.036, 450]] },
+        point: [-25.345, 131.036], zones: [[-25.345, 131.036, 450]],
+        hint: {
+          nl: 'Kangoeroe + wolken boven een platte, rode rotsberg midden in de woestijn. De beroemdste rots van het land, heilig voor de Aboriginals.',
+          en: 'Kangaroo + clouds above a flat, red rock mountain in the middle of the desert. The most famous rock in the country, sacred to the Aboriginal people.',
+        } },
       { key: 'opera', name: { nl: 'Operagebouw van Sydney', en: 'Sydney Opera House' },
-        point: [-33.857, 151.215], zones: [[-33.857, 151.215, 350]] },
+        point: [-33.857, 151.215], zones: [[-33.857, 151.215, 350]],
+        hint: {
+          nl: 'Het silhouet aan het water is een wereldberoemd concertgebouw.',
+          en: 'The silhouette by the water is a world-famous concert hall.',
+        } },
     ],
     hints: {
-      nl: [
-        'Drie plekken, allemaal in hetzelfde land.',
-        'Begin bij de coördinaten: typ ze in het zoekvak boven de kaart. Je komt uit bij een waterval.',
-        'Kangoeroe + wolken boven een platte, rode rotsberg midden in de woestijn. De beroemdste rots van het land, heilig voor de Aboriginals.',
-        'Het silhouet aan het water is een wereldberoemd concertgebouw.',
-      ],
-      en: [
-        'Three places, all in the same country.',
-        'Start with the coordinates: type them into the search box above the map. You will end up at a waterfall.',
-        'Kangaroo + clouds above a flat, red rock mountain in the middle of the desert. The most famous rock in the country, sacred to the Aboriginal people.',
-        'The silhouette by the water is a world-famous concert hall.',
-      ],
+      nl: ['Drie plekken, allemaal in hetzelfde land.'],
+      en: ['Three places, all in the same country.'],
     },
   },
   {
@@ -76,33 +85,39 @@ window.GeoRiddles = [
     position: 3,
     targets: [
       { key: 'spain', name: { nl: 'Straat van Gibraltar (zuidwestpunt van Europa)', en: 'Strait of Gibraltar (south-west tip of Europe)' },
-        point: [36.01, -5.60], zones: [[36.8, -6.5, 550], [40.0, -4.0, 650]] },
+        point: [36.01, -5.60], zones: [[36.8, -6.5, 550], [40.0, -4.0, 650]],
+        hint: {
+          nl: 'Twee zuilen aan een smalle zeestraat, met de vlag van Gibraltar. Het uiterste zuidwesten.',
+          en: 'Two pillars by a narrow strait, with the flag of Gibraltar. The far south-west.',
+        } },
       { key: 'iceland', name: { nl: 'IJsland', en: 'Iceland' },
-        point: [64.9, -18.6], zones: [[64.9, -18.6, 600]] },
+        point: [64.9, -18.6], zones: [[64.9, -18.6, 600]],
+        hint: {
+          nl: 'Een rebus. Een ijsblok + een eiland = …',
+          en: 'A rebus. An ice block + an island = …',
+        } },
       { key: 'finland', name: { nl: 'Finland (Lapland, Rovaniemi)', en: 'Finland (Lapland, Rovaniemi)' },
-        point: [66.5, 25.7], zones: [[61.5, 25.0, 400], [65.5, 26.5, 450], [68.5, 26.0, 350]] },
+        point: [66.5, 25.7], zones: [[61.5, 25.0, 400], [65.5, 26.5, 450], [68.5, 26.0, 350]],
+        hint: {
+          nl: 'Een rendier in de sneeuw, in het hoge noorden waar de Kerstman woont. Steek de zee over naar dat land.',
+          en: 'A reindeer in the snow, far up north where Santa Claus lives. Cross the sea to that country.',
+        } },
       { key: 'ireland', name: { nl: 'Ierland', en: 'Ireland' },
-        point: [53.4, -8.0], zones: [[53.4, -8.0, 450]] },
+        point: [53.4, -8.0], zones: [[53.4, -8.0, 450]],
+        hint: {
+          nl: 'Een pint stout met een gouden harp. Het eiland van de groen-wit-oranje vlag.',
+          en: 'A pint of stout with a golden harp. The island of the green-white-orange flag.',
+        } },
       { key: 'greece', name: { nl: 'Akropolis, Athene (Griekenland)', en: 'Acropolis, Athens (Greece)' },
-        point: [38.0, 23.7], zones: [[38.5, 23.5, 650]] },
+        point: [38.0, 23.7], zones: [[38.5, 23.5, 650]],
+        hint: {
+          nl: 'Een tempel op een rotsplateau, in het uiterste zuidoosten van het werelddeel.',
+          en: 'A temple on a rocky plateau, in the far south-east of the continent.',
+        } },
     ],
     hints: {
-      nl: [
-        'Het vlaggetje bovenaan vertelt in welk werelddeel je zoekt. Volg de vakken I tot V.',
-        'Vak I: twee zuilen aan een smalle zeestraat, met de vlag van Gibraltar. Het uiterste zuidwesten.',
-        'Vak II: een rebus. Een ijsblok + een eiland = …',
-        'Vak III: een rendier in de sneeuw, in het hoge noorden waar de Kerstman woont. Steek de zee over naar dat land.',
-        'Vak IV: een pint stout met een gouden harp. Het eiland van de groen-wit-oranje vlag.',
-        'Vak V: een tempel op een rotsplateau, in het uiterste zuidoosten van het werelddeel.',
-      ],
-      en: [
-        'The small flag at the top tells you which part of the world to search. Follow panels I to V.',
-        'Panel I: two pillars by a narrow strait, with the flag of Gibraltar. The far south-west.',
-        'Panel II: a rebus. An ice block + an island = …',
-        'Panel III: a reindeer in the snow, far up north where Santa Claus lives. Cross the sea to that country.',
-        'Panel IV: a pint of stout with a golden harp. The island of the green-white-orange flag.',
-        'Panel V: a temple on a rocky plateau, in the far south-east of the continent.',
-      ],
+      nl: ['Het vlaggetje bovenaan vertelt in welk werelddeel je zoekt.'],
+      en: ['The small flag at the top tells you which part of the world to search.'],
     },
   },
   {
@@ -111,11 +126,17 @@ window.GeoRiddles = [
     position: 5,
     targets: [
       { key: 'morocco', name: { nl: 'Marokko', en: 'Morocco' },
-        point: [31.8, -7.1], zones: [[34.0, -5.0, 450], [31.0, -7.5, 550]] },
-      { key: 'mali', optional: true, name: { nl: 'Mali (onderweg)', en: 'Mali (on the way)' },
-        point: [17.6, -4.0], zones: [[17.0, -3.0, 750], [13.0, -8.0, 450]] },
+        point: [31.8, -7.1], zones: [[34.0, -5.0, 450], [31.0, -7.5, 550]],
+        hint: {
+          nl: 'MAR: de pijl vertrekt in een land waarvan de naam zo begint.',
+          en: 'MAR: the arrow starts in a country whose name begins like that.',
+        } },
       { key: 'togo', name: { nl: 'Togo', en: 'Togo' },
-        point: [8.6, 0.9], zones: [[8.2, 1.0, 500]] },
+        point: [8.6, 0.9], zones: [[8.2, 1.0, 500]],
+        hint: {
+          nl: 'TOGO: de pijl eindigt in een land met die naam.',
+          en: 'TOGO: the arrow ends in a country with that name.',
+        } },
     ],
     // West-Afrikaanse kust van Togo terug naar Marokko
     coast: [
@@ -128,14 +149,12 @@ window.GeoRiddles = [
       nl: [
         'De grote tekening is een werelddeel dat op zijn zij ligt.',
         'De golfjes en de stippellijn tonen het stuk kust waar de letter ligt.',
-        'MAR en TOGO: zoek twee landen waarvan de naam zo begint en trek een lijn ertussen.',
         'Onderweg loopt je lijn dwars door een groot land in de Sahel: Mali.',
         'De rechte lijn vormt samen met de kustlijn de letter.',
       ],
       en: [
         'The big drawing is a continent lying on its side.',
         'The little waves and the dotted line show the stretch of coast where the letter lies.',
-        'MAR and TOGO: find two countries whose names start like that and draw a line between them.',
         'On the way, your line cuts straight through a large country in the Sahel: Mali.',
         'The straight line together with the coastline forms the letter.',
       ],
@@ -147,9 +166,17 @@ window.GeoRiddles = [
     position: 2,
     targets: [
       { key: 'tikal', name: { nl: 'Tikal (Guatemala)', en: 'Tikal (Guatemala)' },
-        point: [17.222, -89.623], zones: [[17.222, -89.623, 400], [18.0, -92.5, 550], [15.5, -90.3, 350], [20.5, -89.0, 400], [19.5, -97.0, 450]] },
+        point: [17.222, -89.623], zones: [[17.222, -89.623, 400], [18.0, -92.5, 550], [15.5, -90.3, 350], [20.5, -89.0, 400], [19.5, -97.0, 450]],
+        hint: {
+          nl: 'Een trappiramide in het regenwoud, met het wapen van Guatemala. TIKAL.',
+          en: 'A step pyramid in the rainforest, with the coat of arms of Guatemala. TIKAL.',
+        } },
       { key: 'cuba', name: { nl: 'Cuba', en: 'Cuba' },
-        point: [23.1, -82.4], zones: [[23.0, -82.4, 350], [22.0, -79.5, 350], [20.5, -76.0, 400]] },
+        point: [23.1, -82.4], zones: [[23.0, -82.4, 350], [22.0, -79.5, 350], [20.5, -76.0, 400]],
+        hint: {
+          nl: 'Een vlag met blauwe strepen, een rode driehoek en één witte ster: een eiland.',
+          en: 'A flag with blue stripes, a red triangle and one white star: an island.',
+        } },
     ],
     // kust van de Golf van Mexico: van Cuba via Florida en Texas terug naar Mexico
     coast: [
@@ -162,14 +189,10 @@ window.GeoRiddles = [
     hints: {
       nl: [
         'Het vlaggetje bovenaan vertelt op welk continent je zoekt.',
-        'Vak I: een trappiramide in het regenwoud, met het wapen van Guatemala. TIKAL.',
-        'Vak II: een vlag met blauwe strepen, een rode driehoek en één witte ster: een eiland.',
         'Trek de lijn van I naar II. De kust van de golf sluit de lijn tot een gesloten letter.',
       ],
       en: [
         'The small flag at the top tells you which continent to search.',
-        'Panel I: a step pyramid in the rainforest, with the coat of arms of Guatemala. TIKAL.',
-        'Panel II: a flag with blue stripes, a red triangle and one white star: an island.',
         'Draw the line from I to II. The coast of the gulf closes the line into a closed letter.',
       ],
     },

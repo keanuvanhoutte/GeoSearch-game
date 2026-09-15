@@ -141,9 +141,9 @@ button { cursor: pointer; }
 
 /* hintkaart in de linkerkolom, op de plek van de uitleg */
 .hints-card {
-  flex: 1 1 auto; min-height: 0; /* vult de vrije ruimte tot aan het lettervak */ display: flex; flex-direction: column;
+  flex: none; display: flex; flex-direction: column;
   background: #fff; border: 1px solid var(--line); border-top: 3px solid var(--gold); border-radius: var(--radius);
-  padding: 12px 16px 14px; box-shadow: 0 6px 18px rgba(11,26,44,.07); animation: pop .2s ease-out;
+  padding: 12px 16px; box-shadow: 0 6px 18px rgba(11,26,44,.07); animation: pop .2s ease-out;
 }
 .hints-head { flex: none; display: flex; align-items: center; gap: 8px; }
 .hints-head .ht-icon { color: var(--gold-dark); }
@@ -155,22 +155,44 @@ button { cursor: pointer; }
   display: grid; place-items: center; font-size: 13px;
 }
 .hints-close:hover { border-color: var(--ink); color: var(--ink); }
-.hints-empty { flex: 1 1 auto; margin: 8px 0 0; font-size: 14px; line-height: 1.5; color: var(--muted); }
-/* één hint tegelijk in beeld */
-.hint-view { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-top: 14px; display: flex; gap: 12px; align-items: flex-start; }
-.hint-view.new { animation: pop .3s ease-out; }
+/* staat onder de tabs, op de plek van de hint: zo verschuiven de tabs niet bij de eerste keuze */
+.hints-pick { margin: 10px 0 0; padding-top: 10px; border-top: 1px solid var(--line-2); font-size: 13px; line-height: 1.5; color: var(--muted); }
+/* tabs: algemeen of één nummer; wie klikt, krijgt meteen die hint */
+.hint-tabs { flex: none; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+.hint-tab {
+  min-width: 38px; height: 32px; padding: 0 10px; border-radius: 8px;
+  border: 1px solid var(--line); background: #fff; color: var(--text-2);
+  font-family: var(--display); font-weight: 700; font-size: 14px;
+  transition: border-color .12s, background .12s, color .12s;
+}
+.hint-tab:hover { border-color: var(--ink); color: var(--ink); }
+/* al bekeken: licht getint · oplossing getoond: groen */
+.hint-tab.seen { background: var(--paper); }
+.hint-tab.sol { border-color: #9fd6bd; color: var(--green-text); background: #eef8f3; }
+.hint-tab[aria-selected="true"] { background: var(--ink); border-color: var(--ink); color: var(--gold); }
+.hint-body { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--line-2); }
+.hint-body.new { animation: pop .25s ease-out; }
+.hint-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.hint-list li, .hint-view { display: flex; gap: 10px; align-items: flex-start; }
 .hint-num {
-  flex: none; height: 24px; min-width: 32px; margin-top: 1px; border-radius: 7px;
+  flex: none; height: 22px; min-width: 28px; padding: 0 5px; margin-top: 1px; border-radius: 6px;
   background: var(--ink); color: var(--gold); display: grid; place-items: center;
   font-family: var(--mono); font-size: 12px; font-weight: 600;
 }
-.hint-text { margin: 0; font-size: 16px; line-height: 1.55; color: var(--text); text-wrap: pretty; }
-.hint-nav { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 12px; }
-.hint-nav .sq-btn { width: 34px; height: 34px; font-size: 15px; }
-.hint-nav .sq-btn:disabled { opacity: .35; pointer-events: none; }
-.hint-pos { font-size: 13px; color: var(--muted); }
-.hint-btn { flex: none; margin-top: 12px; width: 100%; }
-.hint-btn:disabled { opacity: .5; cursor: default; box-shadow: none; }
+.hint-text { margin: 0; font-size: 15px; line-height: 1.5; color: var(--text); text-wrap: pretty; }
+.hint-more { align-self: flex-start; padding: 7px 12px; font-size: 13px; white-space: normal; text-align: left; }
+.sol-box {
+  display: flex; flex-direction: column; gap: 2px;
+  background: #eef8f3; border: 1px solid #bfe3d2; border-radius: 10px; padding: 8px 12px;
+}
+.sol-box .card-label { color: var(--green-text); }
+.sol-box b { font-family: var(--display); font-weight: 700; font-size: 15px; color: var(--ink); overflow-wrap: anywhere; }
+.sol-box .btn { align-self: flex-start; margin-top: 6px; padding: 6px 10px; font-size: 13px; background: #fff; }
+.hint-full {
+  flex: none; align-self: flex-start; margin-top: 10px; padding: 0; border: 0; background: none;
+  font-size: 12px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px;
+}
+.hint-full:hover { color: var(--ink); }
 
 .side-bottom { margin-top: auto; display: flex; flex-direction: column; gap: 10px; }
 .prow.final-btn:hover { background: rgba(255,200,61,.2); border-color: var(--gold); }
@@ -186,7 +208,8 @@ button { cursor: pointer; }
 .main { flex: 1; min-width: 0; overflow-y: auto; background: var(--paper); }
 
 /* ---------- menu (5a) ---------- */
-.home { padding: 44px 48px; display: flex; flex-direction: column; min-height: 100%; }
+.home { padding: 44px 48px; display: flex; flex-direction: column; justify-content: center; min-height: 100%; }
+.home > .pill { align-self: flex-start; }
 .home-hero { display: flex; align-items: flex-end; justify-content: space-between; gap: 40px; margin-top: 18px; }
 .home h1 { font-family: var(--display); font-weight: 800; font-size: clamp(44px, 5vw, 68px); line-height: 1.02; color: var(--ink); margin: 0; }
 .steps { list-style: none; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
@@ -197,41 +220,6 @@ button { cursor: pointer; }
 }
 .steps b { display: block; font-family: var(--display); font-weight: 700; font-size: 16px; }
 .step-text { display: block; font-size: 14px; color: var(--muted); line-height: 1.5; }
-.section-head { display: flex; align-items: baseline; justify-content: space-between; margin: 34px 0 16px; }
-.section-head h2 { font-family: var(--display); font-weight: 700; font-size: 24px; margin: 0; }
-.section-head span { font-size: 14px; color: var(--muted); }
-/* flex in plaats van grid: een onvolledige laatste rij (D en E) staat in het midden */
-.rgrid { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px; margin-bottom: 26px; }
-.rgrid > .rcard { flex: 0 0 calc((100% - 36px) / 3); min-width: 0; }
-.rcard {
-  background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden;
-  box-shadow: 0 6px 18px rgba(11,26,44,.07); display: flex; flex-direction: column;
-  transition: transform .18s, box-shadow .18s;
-}
-.rcard:hover { transform: translateY(-3px); box-shadow: 0 14px 30px rgba(11,26,44,.14); }
-.rcard.next { border: 2px solid var(--ink); box-shadow: 0 10px 24px rgba(11,26,44,.12); }
-.rcard-plate { border-bottom: 1px solid var(--line); aspect-ratio: 16 / 10; display: grid; place-items: center; padding: 10px; overflow: hidden; }
-.rcard-plate svg { display: block; width: 100%; height: 100%; }
-.rcard-foot { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-.rcard-name { font-family: var(--display); font-weight: 700; font-size: 17px; }
-.badge { border-radius: 999px; padding: 4px 10px; font-size: 12px; font-weight: 600; background: var(--paper-2); color: var(--muted); white-space: nowrap; }
-.badge.ok { background: #dff3ea; color: #1e9e6a; }
-.badge.next { background: var(--ink); color: #fff; }
-.final-bar {
-  margin-top: auto; display: flex; align-items: center; gap: 20px;
-  background: var(--ink); border-radius: var(--radius); padding: 16px 20px;
-  box-shadow: 0 10px 24px rgba(11,26,44,.2); color: #fff; transition: background .15s;
-}
-.final-bar:hover { background: var(--ink-2); }
-.fb-star {
-  width: 56px; height: 56px; flex: none; border-radius: 50%;
-  background: var(--ink-2); border: 1px solid rgba(255,255,255,.08);
-  color: var(--gold); display: grid; place-items: center; font-size: 20px;
-}
-.fb-text { flex: 1; display: flex; flex-direction: column; }
-.fb-text b { font-family: var(--display); font-weight: 700; font-size: 18px; }
-.fb-text small { font-size: 14px; color: var(--side-muted); margin-top: 2px; }
-.fb-word { font-family: var(--mono); font-size: 20px; letter-spacing: 7px; color: var(--gold); }
 
 /* ---------- raadselscherm (6a/6b) ---------- */
 .main-riddle { display: flex; flex-direction: column; overflow: hidden; }
@@ -239,8 +227,28 @@ button { cursor: pointer; }
 .rhead-text { flex: 1; min-width: 0; }
 .rhead h1 { font-family: var(--display); font-weight: 700; font-size: 26px; margin: 0; }
 .rhead p { font-size: 14px; color: var(--muted); margin: 1px 0 0; }
-.rbody { display: grid; grid-template-columns: 376px 1fr; gap: 20px; padding: 18px 28px 24px; flex: 1; min-height: 0; }
+/* --left: breedte van de plaatkolom; standaard iets meer dan een derde, de speler kan ze verslepen */
+.rbody {
+  --left: 36%;
+  display: grid; grid-template-columns: clamp(300px, var(--left), calc(100% - 400px)) 20px minmax(0, 1fr);
+  padding: 18px 28px 24px; flex: 1; min-height: 0;
+}
 .rleft { display: flex; flex-direction: column; gap: 14px; min-height: 0; overflow-y: auto; padding: 2px; margin: -2px; }
+
+.splitter { position: relative; display: grid; place-items: center; cursor: col-resize; touch-action: none; outline: none; }
+.splitter::before { content: ''; position: absolute; top: 8px; bottom: 8px; left: 50%; width: 2px; margin-left: -1px; border-radius: 2px; background: transparent; transition: background .15s; }
+.splitter span {
+  position: relative; width: 10px; height: 52px; border-radius: 999px;
+  background-color: #fff; border: 1px solid var(--line); box-shadow: 0 2px 6px rgba(11,26,44,.1);
+  background-image: radial-gradient(circle, var(--muted-2) 1.3px, transparent 1.8px);
+  background-size: 100% 9px; background-position: center 3px;
+  transition: background-color .15s, border-color .15s;
+}
+.splitter:hover::before, .splitter:focus-visible::before, .resizing .splitter::before { background: var(--gold); }
+.splitter:hover span, .splitter:focus-visible span, .resizing .splitter span { background-color: var(--gold); border-color: var(--gold-dark); }
+.splitter:focus-visible span { box-shadow: 0 0 0 3px rgba(255,200,61,.5); }
+body.resizing { cursor: col-resize; user-select: none; }
+body.resizing .rleft, body.resizing .mapbox { pointer-events: none; }
 
 .plate-card {
   position: relative; display: block; width: 100%; flex: none;
@@ -248,6 +256,10 @@ button { cursor: pointer; }
   box-shadow: 0 6px 18px rgba(11,26,44,.07); cursor: zoom-in; text-align: left;
 }
 .plate-card svg { display: block; width: 100%; height: auto; }
+/* het vak van het nummer dat in de hints gekozen is, licht op */
+.num-hit { fill: none; stroke: none; pointer-events: none; }
+.plate-card [data-num].focus .num-hit { fill: rgba(255,200,61,.16); stroke: #e0a91f; stroke-width: 6; }
+body.dragging-num, body.dragging-num * { cursor: grabbing !important; user-select: none; }
 .zoom-chip {
   position: absolute; right: 16px; bottom: 16px;
   background: rgba(11,26,44,.88); color: #fff; border-radius: 999px;
@@ -286,7 +298,7 @@ button { cursor: pointer; }
 }
 .success-title { font-family: var(--display); font-weight: 700; font-size: 20px; color: var(--green-text); }
 .success-sub { font-size: 14px; color: var(--muted); margin-top: 2px; }
-.success-actions { display: flex; gap: 8px; margin-top: 16px; }
+.success-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
 .success-actions .btn { padding: 13px 12px; }
 .success-actions .btn.gold { font-size: 15px; }
 .success-actions .btn.outline { font-size: 13px; }
@@ -296,12 +308,17 @@ button { cursor: pointer; }
 .places { list-style: none; margin: 10px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
 .places li { display: flex; gap: 10px; align-items: center; font-size: 14px; }
 .places li span {
-  width: 20px; height: 20px; flex: none; border-radius: 50%;
+  min-width: 24px; height: 24px; padding: 0 4px; flex: none; border-radius: 12px;
   background: var(--gold); color: var(--ink); display: grid; place-items: center; font-size: 11px; font-weight: 700;
 }
 
 /* ---------- kaart ---------- */
-.mapbox { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); min-height: 0; background: var(--sea); }
+.mapbox { position: relative; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); min-height: 0; background: var(--sea); container-type: inline-size; }
+/* smalle kaart (gsm, of een brede plaatkolom): de bronvermelding loopt over twee regels, dus de knoppen schuiven op */
+@container (max-width: 560px) {
+  .mapbox > .map-bottom { bottom: 40px; }
+  .mapbox > .map-bottom > .spacer { display: none; }
+}
 #map { position: absolute; inset: 0; background: var(--sea); cursor: crosshair; }
 .mapbox.is-solved #map { cursor: grab; }
 .leaflet-container { font-family: var(--body); }
@@ -332,37 +349,67 @@ button { cursor: pointer; }
 .search-popup .leaflet-popup-content { margin: 12px 14px; }
 .search-pop { display: flex; flex-direction: column; gap: 10px; font-family: var(--body); }
 .search-pop b { font-family: var(--display); font-weight: 700; font-size: 16px; color: var(--ink); padding-right: 12px; }
-.search-pop .btn { padding: 9px 14px; font-size: 14px; }
+.pop-label { font-size: 13px; color: var(--muted); margin-bottom: -4px; }
+.pop-nums { display: flex; flex-wrap: wrap; gap: 6px; }
+.pop-nums .num-chip { width: 36px; height: 36px; cursor: pointer; background: #fff; color: var(--ink); border: 2px solid var(--ink); box-shadow: none; }
+.pop-nums .num-chip.placed { background: var(--paper-2); color: var(--muted); border-color: var(--line); }
+.pop-nums .num-chip.suggest { background: var(--gold); color: var(--ink); border-color: var(--gold-dark); }
+.pop-nums .num-chip:hover { border-color: var(--ink); color: var(--ink); }
+.pin-pop { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; font-family: var(--body); }
+.pin-pop b { font-family: var(--display); font-weight: 700; font-size: 15px; color: var(--ink); white-space: nowrap; }
+.pin-pop .btn { padding: 7px 12px; font-size: 13px; }
 
 .map-bottom {
   position: absolute; left: 16px; right: 16px; bottom: 24px; z-index: 500;
   display: flex; align-items: center; gap: 8px; flex-wrap: wrap; pointer-events: none;
 }
-.count-pill { background: rgba(11,26,44,.9); border: 1px solid rgba(255,255,255,.14); color: #fff; border-radius: 10px; padding: 11px 14px; font-size: 14px; font-weight: 600; white-space: nowrap; }
+/* nummerbalk: sleep een nummer naar de kaart, of klik het aan en klik dan op de kaart */
+.num-tray { display: flex; gap: 6px; background: rgba(11,26,44,.9); border: 1px solid rgba(255,255,255,.14); border-radius: 12px; padding: 6px; }
+.num-chip {
+  width: 38px; height: 38px; flex: none; padding: 0; border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--display); font-weight: 800; font-size: 13px; letter-spacing: .02em;
+  background: #fff; color: var(--ink); border: 2px solid #fff; box-shadow: 0 2px 0 rgba(0,0,0,.35);
+  cursor: grab; touch-action: none; user-select: none;
+  transition: transform .12s, background .12s, border-color .12s, box-shadow .12s, opacity .12s;
+}
+.num-chip:hover { transform: translateY(-2px); }
+/* op de kaart: zelfde kleur als het punt */
+.num-chip.placed { background: var(--coral); color: #fff; box-shadow: none; }
+.num-chip.ok { background: #1e9e6a; }
+.num-chip.near { background: #f59e0b; }
+.num-chip.miss { background: #6b7280; }
+.num-chip:not(.placed) { cursor: pointer; }
+/* gekozen nummer: komt op de volgende klik op de kaart */
+.num-chip.chosen { background: var(--coral); color: #fff; transform: translateY(-4px) scale(1.1); box-shadow: 0 0 0 3px #fff, 0 6px 14px rgba(0,0,0,.45); }
+.num-chip.dragging { opacity: .4; }
+
 .tool-group { display: flex; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 3px 0 rgba(0,0,0,.25); }
-.tool-group button { border: 0; background: #fff; padding: 11px 12px; font-size: 14px; font-weight: 600; color: var(--text); white-space: nowrap; }
+.tool-group button { border: 0; background: #fff; min-width: 44px; padding: 11px 12px; font-size: 16px; font-weight: 600; color: var(--text); white-space: nowrap; display: grid; place-items: center; }
 .tool-group button + button { border-left: 1px solid #e7e1d4; }
 .tool-group button:hover { background: var(--paper); }
-.tool-group button.on { background: var(--gold); color: var(--ink); }
+.tool-group button:disabled { color: #bdb5a6; background: #fff; cursor: default; }
 .spacer { flex: 1; }
-.map-bottom .btn.ghost-light { background: rgba(11,26,44,.55); backdrop-filter: blur(4px); padding: 11px 14px; }
 .map-bottom .btn.gold { font-size: 15px; padding: 11px 18px; }
 
 .pin {
-  width: 28px; height: 28px; border-radius: 50%;
+  width: 30px; height: 30px; border-radius: 50%;
   display: grid; place-items: center;
-  background: var(--coral); color: #fff; font-weight: 700; font-size: 12px;
+  background: var(--coral); color: #fff; font-family: var(--display); font-weight: 800; font-size: 12px;
   border: 2px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,.45);
-  transition: transform .12s;
+  cursor: grab; transition: transform .12s;
 }
+.pin:hover { transform: scale(1.12); }
 .pin.ok { background: #1e9e6a; }
 .pin.near { background: #f59e0b; }
 .pin.miss { background: #6b7280; }
-.pin.movable { cursor: grab; box-shadow: 0 0 0 4px rgba(255, 200, 61, .6), 0 2px 8px rgba(0,0,0,.45); }
-.pin.movable:hover { transform: scale(1.12); }
-.pin.selected { background: var(--gold); color: var(--ink); transform: scale(1.25); box-shadow: 0 0 0 5px rgba(255,255,255,.85), 0 4px 14px rgba(0,0,0,.5); }
-#map.moving { cursor: default; }
-#map.moving .leaflet-marker-icon { cursor: grab; }
+.pin.given { box-shadow: 0 0 0 3px var(--gold), 0 2px 8px rgba(0,0,0,.45); }
+/* extra punt zonder nummer, om de lijn verder te trekken (gesloten letters) */
+.pin.extra { width: 16px; height: 16px; font-size: 0; }
+.leaflet-dragging .pin { cursor: grabbing; }
+/* het nummer dat de speler versleept */
+.drag-ghost { position: fixed; left: 0; top: 0; z-index: 4000; pointer-events: none; transform: translate(-50%, -50%) scale(1.15); opacity: .92; transition: transform .1s; }
+.drag-ghost.over { transform: translate(-50%, -50%) scale(1.35); }
 
 .sol-pin {
   width: 30px; height: 30px; border-radius: 50%;
@@ -509,9 +556,7 @@ a.key-row:hover { background: var(--paper); }
 
 /* ---------- kleinere schermen ---------- */
 @media (max-width: 1180px) {
-  .rbody { grid-template-columns: 320px 1fr; }
   .home { padding: 36px 32px; }
-  .rgrid > .rcard { flex-basis: calc((100% - 18px) / 2); }
   .final-wrap { padding: 32px; }
   .final-card { padding: 36px; }
 }
@@ -527,7 +572,8 @@ a.key-row:hover { background: var(--paper); }
   .main { overflow: visible; }
   .main-riddle { overflow: visible; }
   .rhead { padding: 18px 18px 0; }
-  .rbody { grid-template-columns: 1fr; padding: 14px 18px 24px; }
+  .rbody { grid-template-columns: 1fr; row-gap: 20px; padding: 14px 18px 24px; }
+  .splitter { display: none; }
   .rleft { overflow: visible; }
   .answer-card, .places-card { margin-top: 0; }
   .mapbox { height: 72vh; }
@@ -540,14 +586,9 @@ a.key-row:hover { background: var(--paper); }
   .map-top .search { flex-basis: 100%; }
 }
 @media (max-width: 600px) {
-  .rgrid > .rcard { flex-basis: 100%; }
   .big-slot span { height: 64px; font-size: 28px; }
   .lightbox { padding: 12px; }
   .lb-close { top: 10px; right: 10px; }
-  .map-bottom .spacer { display: none; }
-  .map-bottom { bottom: 40px; } /* vrij van de bronvermelding, die hier over twee regels loopt */
-  .final-bar { gap: 14px; }
-  .fb-word { letter-spacing: 3px; font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
