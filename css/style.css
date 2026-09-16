@@ -236,6 +236,10 @@ button { cursor: pointer; }
 .pchip.on { background: var(--ink); border-color: var(--ink); }
 .pchip.on b { color: var(--gold); }
 .pchip.on small { color: var(--side-muted); }
+/* een uitgespeelde reis draagt een vinkje bij haar stand */
+.pchip.done small { color: var(--green-text); font-weight: 600; }
+.pchip.done small::before { content: '\2713\00a0'; }
+.pchip.on.done small { color: var(--gold); }
 
 /* ---------- raadselscherm (6a/6b) ---------- */
 .main-riddle { display: flex; flex-direction: column; overflow: hidden; }
@@ -556,6 +560,7 @@ a.key-row:hover { background: var(--paper); }
 .grand-words i { color: var(--side-muted); font-style: normal; }
 @keyframes fade { to { opacity: .9; } }
 .home-cta { display: flex; flex-direction: column; align-items: flex-end; gap: 12px; flex: none; }
+.cta-note { font-size: 12px; color: var(--muted); text-align: right; max-width: 30ch; margin: -4px 0 0; line-height: 1.5; }
 .grand-link {
   display: inline-flex; flex-direction: column; gap: 2px; text-align: right;
   background: var(--ink); border-radius: 12px; padding: 10px 16px;
@@ -632,6 +637,7 @@ a.key-row:hover { background: var(--paper); }
   .home { padding: 24px 18px; }
   .home-hero { flex-direction: column; align-items: flex-start; gap: 20px; }
   .home-cta { align-items: flex-start; }
+  .cta-note { text-align: left; }
   .grand-link { text-align: left; }
   .steps { grid-template-columns: 1fr; }
   .final-wrap { padding: 18px; }

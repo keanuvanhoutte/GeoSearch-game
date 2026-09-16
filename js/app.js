@@ -20,11 +20,16 @@
   // pts/res/given: per nummer (index = doel), null zolang dat nummer niet op de kaart staat.
   // extra: vrije punten na de nummers, om een gesloten letter (D, O) langs de kust af te maken.
   // seen: geopende hints ('g0' = algemene hint, 't2' = hint voor nummer III). sol: nummers waarvan de oplossing getoond is.
+  // at: het raadsel waar de speler het laatst was, zodat "Verder spelen" daarheen wijst.
   function freshState() {
     const r = {};
     RIDDLES.forEach((q) => { r[q.id] = { pts: [], res: [], given: [], extra: [], seen: [], sol: [], found: false, revealed: false, letter: null }; });
-    return { lang: 'nl', r, final: false };
+    return { lang: 'nl', r, final: false, at: null };
   }
+  /* Een punt uit de opslag: [lat, lng] of [lat, lng, speling in km]. De lengtegraad mag buiten
+     ±180 liggen: een punt op een andere wereldkopie houdt zo zijn plek naast zijn buren. */
+  const readPt = (p) => (Array.isArray(p) && p.length >= 2 && p.slice(0, 3).every((n) => typeof n === 'number' && isFinite(n))
+    && Math.abs(p[0]) <= 90 && Math.abs(p[1]) <= 1080 ? p.slice(0, 3) : null);
   function loadState() {
     const base = freshState();
     try {
@@ -32,28 +37,37 @@
       if (saved && saved.r) {
         base.lang = saved.lang === 'en' ? 'en' : 'nl';
         base.final = !!saved.final;
+        if (RIDDLES.some((q) => q.id === saved.at)) base.at = saved.at;
         RIDDLES.forEach((q) => {
           const old = saved.r[q.id] || {};
           const s = base.r[q.id];
+          const N = q.targets.length;
           s.letter = old.letter || null;
           s.revealed = !!old.revealed;
           // oudere versies bewaarden enkel een aantal hints: die beginnen opnieuw
           if (Array.isArray(old.seen)) s.seen = old.seen.filter((k) => typeof k === 'string');
-          if (Array.isArray(old.sol)) s.sol = old.sol.filter((i) => Number.isInteger(i) && i >= 0 && i < q.targets.length);
+          if (Array.isArray(old.sol)) s.sol = old.sol.filter((i) => Number.isInteger(i) && i >= 0 && i < N);
+          /* De punten komen terug zoals ze op de kaart stonden, met de kleur van de laatste controle.
+             Een raadsel dat sindsdien een ander aantal plaatsen kreeg, begint wel opnieuw. */
+          if (Array.isArray(old.pts) && old.pts.length === N) {
+            s.pts = old.pts.map(readPt);
+            const res = Array.isArray(old.res) ? old.res : [];
+            s.res = s.pts.map((p, i) => (p && ['ok', 'near', 'miss'].includes(res[i]) ? res[i] : null));
+            if (Array.isArray(old.given)) s.given = old.given.filter((i) => Number.isInteger(i) && i >= 0 && i < N && s.pts[i]);
+            if (Array.isArray(old.extra)) s.extra = old.extra.map(readPt).filter(Boolean);
+            s.found = !!old.found && s.res.every((x) => x === 'ok');
+          }
         });
       }
     } catch (e) { /* geen opslag beschikbaar */ }
     return base;
   }
   let state = loadState();
-  // Geplaatste punten worden niet bewaard tussen bezoeken: een raadsel opent nooit met punten.
-  // Letters, hints, getoonde oplossingen en taal blijven wel bewaard.
+  /* Alles blijft bewaard tot de speler zelf "Voortgang wissen" kiest: de punten op de kaart,
+     de letters, de geopende hints, de getoonde oplossingen en de taal. Elke wijziging gaat er
+     meteen in, dus een tab die dichtvalt kost niets. Elke reis heeft haar eigen sleutel. */
   const save = () => {
-    try {
-      const r = {};
-      Object.entries(state.r).forEach(([id, s]) => { r[id] = { ...s, pts: [], res: [], given: [], extra: [], found: false }; });
-      localStorage.setItem(STORE_KEY, JSON.stringify({ ...state, r }));
-    } catch (e) { /* ignore */ }
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
   };
 
   const t = (key, vars = {}) =>
@@ -424,8 +438,14 @@
   }
 
   function renderHome() {
-    const upcoming = nextUnsolved(-1);
+    // Verder waar de speler gebleven was: het laatst geopende raadsel, anders het eerstvolgende.
+    const last = state.at && state.r[state.at] && !state.r[state.at].letter ? RIDDLES.find((q) => q.id === state.at) : null;
+    const upcoming = last || nextUnsolved(-1);
     const startHref = upcoming ? `#/raadsel/${upcoming.id}` : '#/finale';
+    const started = state.final || RIDDLES.some((q) => {
+      const s = state.r[q.id];
+      return !!s.letter || !!s.seen.length || s.revealed || s.pts.some(Boolean);
+    });
     const words = TEXT[state.lang].numbers;
     const steps = [1, 2, 3].map((n) => `
       <li><span class="step-num">${n}</span><div><b>${t(`how${n}t`)}</b><span class="step-text">${t(`how${n}`, { n: words[FINAL.length] || FINAL.length })}</span></div></li>`).join('');
@@ -434,10 +454,15 @@
       <div class="picker">
         <div class="picker-label">${t('pickTitle')}</div>
         <div class="picker-row">
-          ${PUZZLE.list.map((p) => `
-            <button class="pchip ${p.id === PUZZLE.id ? 'on' : ''}" type="button" data-pz="${p.id}" ${p.id === PUZZLE.id ? 'aria-current="true"' : ''}>
-              <b>${esc(p.name[state.lang] || p.name.nl)}</b><small>${t('pickSub', { n: p.riddles })}</small>
-            </button>`).join('')}
+          ${PUZZLE.list.map((p) => {
+            // Elke reis bewaart haar eigen voortgang: die staat hier, zodat de speler ziet waar ze gebleven is.
+            const st = PUZZLE.progress(p.id);
+            const sub = st.final ? t('pickDone') : st.done ? t('pickBusy', { d: st.done, n: p.riddles }) : t('pickSub', { n: p.riddles });
+            return `
+            <button class="pchip ${p.id === PUZZLE.id ? 'on' : ''} ${st.final ? 'done' : ''}" type="button" data-pz="${p.id}" ${p.id === PUZZLE.id ? 'aria-current="true"' : ''}>
+              <b>${esc(p.name[state.lang] || p.name.nl)}</b><small>${sub}</small>
+            </button>`;
+          }).join('')}
         </div>
       </div>`;
 
@@ -450,7 +475,8 @@
             <p class="lead">${t('intro')}</p>
           </div>
           <div class="home-cta">
-            <a class="btn gold big" href="${startHref}">${t('start')} →</a>
+            <a class="btn gold big" href="${startHref}">${started ? t('resume') : t('start')} →</a>
+            <p class="cta-note">${t('savedNote')}</p>
             ${allJourneysDone() ? `<a class="grand-link" href="#/slot"><b>Blue planet, our world</b><small>${t('grandLink')} →</small></a>` : ''}
           </div>
         </div>
@@ -531,6 +557,8 @@
     if (idx < 0) { location.hash = '#/'; return; }
     const q = RIDDLES[idx];
     const s = state.r[q.id];
+    // onthouden waar de speler zat, zodat het startscherm hier weer binnenkomt
+    if (state.at !== q.id) { state.at = q.id; save(); }
     const prev = RIDDLES[idx - 1], next = RIDDLES[idx + 1];
     const general = q.hints[state.lang];
     const solved = !!s.letter;
@@ -918,6 +946,7 @@
       });
       $('#undo').disabled = !history.length;
       $('#clear').disabled = !placed().length && !s.extra.length;
+      save(); // elke wijziging aan de punten gaat meteen de opslag in
     }
 
     // Andere punten houden hun kleur; enkel een nieuw of verplaatst punt is nog niet gecontroleerd.
@@ -1108,6 +1137,7 @@
       const line = $('#answer-status');
       if (f === total) {
         s.found = true;
+        save();
         line.textContent = t('foundAll');
         line.className = 'answer-status good';
         drawSolution(false);
@@ -1199,9 +1229,22 @@
       else toast(failed ? t('searchFail') : t('notFound', { q: query }), 'error');
     });
 
-    // Een raadsel opent altijd op de wereldkaart: geen zoom naar eerdere punten en geen oplossing.
+    /* Staan er nog punten van een vorig bezoek, dan opent de kaart daarbij in plaats van op de
+       wereldkaart. Wie alle plekken al gevonden had, ziet de gouden lijn meteen terug. */
     redraw();
-    setTimeout(() => map && map.invalidateSize(), 60);
+    setTimeout(() => {
+      if (map !== self) return;
+      map.invalidateSize();
+      const back = s.pts.filter(Boolean).concat(s.extra);
+      if (!back.length) return;
+      if (s.found) {
+        drawSolution(false, false);
+        const line = $('#answer-status');
+        if (line) { line.textContent = t('foundAll'); line.className = 'answer-status good'; }
+      } else {
+        map.fitBounds(L.latLngBounds(back.map((p) => [p[0], p[1]])).pad(0.35), { maxZoom: 6 });
+      }
+    }, 60);
     return { placeSolution };
   }
 

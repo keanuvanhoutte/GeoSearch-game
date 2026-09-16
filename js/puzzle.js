@@ -1,6 +1,6 @@
 /* Kiest welke raadselset (welke "reis") actief is. Elke reis heeft haar eigen raadsels,
    platen, eindwoord en eigen opgeslagen voortgang. De keuze staat op het startscherm en
-   wordt bewaard; wisselen laadt de pagina opnieuw, zodat de app met de andere set start.
+   wordt bewaard, dus wie terugkomt begint weer in de reis waar hij mee bezig was.
    Dit bestand wordt geladen ná riddles(.js/-blue.js) en cards(.js/-blue.js), vóór app.js. */
 (function () {
   const KEY = 'geosearch-puzzle';
@@ -58,6 +58,24 @@
     get id() { return active.id; },
     list: LIST.map((p) => ({ id: p.id, name: p.name, riddles: p.riddles.length, word: p.word })),
     storeKey,
+    /* De stand van één reis, uit haar eigen opslag: hoeveel letters al gevonden zijn en of
+       het eindwoord al klopt. Het startscherm zet dat bij elke reis, zodat een speler die
+       later terugkomt ziet waar ze gebleven is. */
+    progress(pid) {
+      const p = LIST.find((x) => x.id === pid);
+      if (!p) return { done: 0, total: 0, final: false };
+      try {
+        const saved = JSON.parse(localStorage.getItem(storeKey(pid)));
+        if (saved && saved.r) {
+          return {
+            done: p.riddles.filter((q) => saved.r[q.id] && saved.r[q.id].letter).length,
+            total: p.riddles.length,
+            final: !!saved.final,
+          };
+        }
+      } catch (e) { /* geen opslag beschikbaar */ }
+      return { done: 0, total: p.riddles.length, final: false };
+    },
     /* De reizen waarvan het eindwoord al gevonden is. Elke reis bewaart dat apart,
        dus voor het slot van het spel lezen we ze alle vier uit. */
     solved() {

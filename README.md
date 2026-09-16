@@ -4,6 +4,8 @@ Een geografische puzzel: trek lijnen op de wereldkaart en ontdek de letters die 
 
 Er zijn vier reizen, elk met een eigen eindwoord: vijf raadsels in de eerste, vier in de tweede, zes in de derde en drie in de vierde. Je kiest ze op het startscherm; elke reis houdt haar eigen voortgang bij. Wie alle vier de eindwoorden vindt, krijgt het slot van het spel te zien.
 
+Je voortgang wordt in je browser bewaard: de punten op de kaart, de geopende hints, de gevonden letters en de reis waar je mee bezig was. Sluit je de tab, dan pak je een andere dag de draad weer op met "Verder spelen". Pas als je zelf op "Voortgang wissen" klikt (links onderaan) begint die reis opnieuw; de andere reizen blijven dan staan.
+
 **Speel online:** https://keanuvanhoutte.github.io/GeoSearch-game/
 
 ## Zo werkt het
