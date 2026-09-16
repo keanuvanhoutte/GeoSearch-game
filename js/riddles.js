@@ -166,7 +166,7 @@ window.GeoRiddles = [
     position: 2,
     targets: [
       { key: 'tikal', name: { nl: 'Tikal (Guatemala)', en: 'Tikal (Guatemala)' },
-        point: [17.222, -89.623], zones: [[17.222, -89.623, 400], [18.0, -92.5, 550], [15.5, -90.3, 350], [20.5, -89.0, 400], [19.5, -97.0, 450]],
+        point: [17.222, -89.623], zones: [[17.222, -89.623, 400], [18.0, -92.5, 550], [15.5, -90.3, 350], [20.5, -89.0, 370], [19.5, -97.0, 450]],
         hint: {
           nl: 'Een trappiramide in het regenwoud, met het wapen van Guatemala. TIKAL.',
           en: 'A step pyramid in the rainforest, with the coat of arms of Guatemala. TIKAL.',
