@@ -42,16 +42,20 @@
     if (LIST.some((p) => p.id === saved)) id = saved;
   } catch (e) { /* geen opslag beschikbaar */ }
 
-  const active = LIST.find((p) => p.id === id);
-  window.GeoRiddles = active.riddles;
-  window.GeoCards = active.cards;
-  window.GeoFinalWord = active.word;
+  let active = LIST.find((p) => p.id === id);
+  const apply = (p) => {
+    active = p;
+    window.GeoRiddles = p.riddles;
+    window.GeoCards = p.cards;
+    window.GeoFinalWord = p.word;
+  };
+  apply(active);
 
   // sleutel waaronder app.js de voortgang van één reis bewaart
   const storeKey = (pid) => (pid === 'world' ? 'geosearch-v1' : `geosearch-v1-${pid}`);
 
   window.GeoPuzzle = {
-    id: active.id,
+    get id() { return active.id; },
     list: LIST.map((p) => ({ id: p.id, name: p.name, riddles: p.riddles.length, word: p.word })),
     storeKey,
     /* De reizen waarvan het eindwoord al gevonden is. Elke reis bewaart dat apart,
@@ -64,11 +68,15 @@
         } catch (e) { return false; }
       }).map((p) => p.id);
     },
+    /* Wisselt van reis zonder de pagina te herladen: de globale raadsels, platen
+       en het eindwoord wijzen daarna naar de nieuwe set. app.js tekent zelf opnieuw.
+       Geeft false terug als er niets te wisselen viel. */
     select(next) {
-      if (next === active.id || !LIST.some((p) => p.id === next)) return;
-      try { localStorage.setItem(KEY, next); } catch (e) { /* ignore */ }
-      location.hash = '#/';
-      location.reload();
+      const p = LIST.find((x) => x.id === next);
+      if (!p || p.id === active.id) return false;
+      apply(p);
+      try { localStorage.setItem(KEY, next); } catch (e) { /* geen opslag beschikbaar */ }
+      return true;
     },
   };
 })();

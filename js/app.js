@@ -1,11 +1,12 @@
 (function () {
-  const RIDDLES = window.GeoRiddles;
   const TEXT = window.GeoText;
-  const CARDS = window.GeoCards;
-  const FINAL = window.GeoFinalWord;
   const PUZZLE = window.GeoPuzzle;
+  // De actieve reis kan tijdens het spelen wisselen, dus deze vier lopen mee.
   // Elke reis bewaart haar eigen voortgang; de eerste reis houdt de oorspronkelijke sleutel.
-  const STORE_KEY = PUZZLE ? PUZZLE.storeKey(PUZZLE.id) : 'geosearch-v1';
+  let RIDDLES = window.GeoRiddles;
+  let CARDS = window.GeoCards;
+  let FINAL = window.GeoFinalWord;
+  let STORE_KEY = PUZZLE ? PUZZLE.storeKey(PUZZLE.id) : 'geosearch-v1';
   const SPLIT_KEY = 'geosearch-split'; // breedte van de plaatkolom, door de speler versleept
   const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -406,6 +407,22 @@
   }
 
   /* ---------- menu ---------- */
+  /* Van reis wisselen: de raadsels, platen en het eindwoord wijzen naar de nieuwe set
+     en de voortgang van die reis wordt ingelezen. De taalkeuze reist mee. */
+  function switchPuzzle(next) {
+    if (!PUZZLE || !PUZZLE.select(next)) return;
+    destroyMap();
+    const lang = state.lang;
+    RIDDLES = window.GeoRiddles;
+    CARDS = window.GeoCards;
+    FINAL = window.GeoFinalWord;
+    STORE_KEY = PUZZLE.storeKey(PUZZLE.id);
+    state = loadState();
+    state.lang = lang;
+    save();
+    renderHome();
+  }
+
   function renderHome() {
     const upcoming = nextUnsolved(-1);
     const startHref = upcoming ? `#/raadsel/${upcoming.id}` : '#/finale';
@@ -442,7 +459,7 @@
       </div>`, 'main-home');
 
     document.querySelectorAll('[data-pz]').forEach((btn) =>
-      btn.addEventListener('click', () => PUZZLE.select(btn.dataset.pz)));
+      btn.addEventListener('click', () => switchPuzzle(btn.dataset.pz)));
   }
 
   /* ---------- raadsel ---------- */
