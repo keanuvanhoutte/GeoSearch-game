@@ -139,11 +139,12 @@ window.GeoRiddlesBlue = [
     letter: 'E',
     position: 4,
     targets: [
-      { key: 'kathmandu', name: { nl: 'Kathmandu (Nepal)', en: 'Kathmandu (Nepal)' },
-        point: [27.7172, 85.3240], zones: [[27.7172, 85.3240, 300]],
+      { key: 'nepal', name: { nl: 'Nepal', en: 'Nepal' },
+        point: [28.3, 84.1],
+        zones: [[28.3, 84.1, 200], [27.7, 85.3, 240], [27.6, 86.4, 260], [27.0, 87.5, 260]],
         hint: {
-          nl: 'Een enorme witte koepel met een gouden torentje erop en twee grote ogen die alle kanten op kijken, met gebedsvlaggetjes eraan. Hij staat in de hoofdstad van Nepal, in een dal onder de hoogste bergen ter wereld.',
-          en: 'A huge white dome with a little golden tower on top and two big eyes looking out in every direction, with prayer flags strung from it. It stands in the capital of Nepal, in a valley below the highest mountains on earth.',
+          nl: 'Het smalle bergland tussen India en Tibet, waar de hoogste bergen ter wereld staan. In het dal hangen gebedsvlaggetjes aan een witte koepel met twee grote ogen erop.',
+          en: 'The narrow mountain country between India and Tibet, home to the highest mountains on earth. In the valley prayer flags hang from a white dome with two big eyes painted on it.',
         } },
       { key: 'fuji', name: { nl: 'Mount Fuji (Japan)', en: 'Mount Fuji (Japan)' },
         point: [35.3606, 138.7274], zones: [[35.3606, 138.7274, 400]],
@@ -155,8 +156,8 @@ window.GeoRiddlesBlue = [
         point: [53.5000, 108.2000],
         zones: [[53.5, 108.2, 450], [51.8, 105.0, 350], [55.4, 109.6, 400]],
         hint: {
-          nl: 'Het diepste meer ter wereld: 1642 meter diep, een lange sikkel water in Siberië, net ten noorden van Mongolië. ’s Winters ligt er meterdik ijs op, met zeehonden die erop liggen te zonnen.',
-          en: 'The deepest lake in the world: 1642 metres deep, a long crescent of water in Siberia, just north of Mongolia. In winter metres-thick ice covers it, with seals basking on top.',
+          nl: 'Siberië, net ten noorden van Mongolië: daar ligt het diepste meer ter wereld, 1642 meter diep. ’s Winters ligt er meterdik ijs op, met zeehonden die erop liggen te zonnen. Klik ergens op dat lange sikkelvormige meer.',
+          en: 'Siberia, just north of Mongolia: there lies the deepest lake in the world, 1642 metres deep. In winter metres-thick ice covers it, with seals basking on top. Click anywhere on that long crescent-shaped lake.',
         } },
       { key: 'tajmahal', name: { nl: 'Taj Mahal (India)', en: 'Taj Mahal (India)' },
         point: [27.1751, 78.0421], zones: [[27.1751, 78.0421, 400]],
@@ -167,14 +168,14 @@ window.GeoRiddlesBlue = [
       { key: 'bali', name: { nl: 'Bali (Indonesië)', en: 'Bali (Indonesia)' },
         point: [-8.3405, 115.0920], zones: [[-8.3405, 115.0920, 350]],
         hint: {
-          nl: 'Een tempel met gestapelde rieten daken op een rots in zee, op het eiland van de rijstterrassen vlak ten oosten van Java. Het bekendste vakantie-eiland van Indonesië.',
-          en: 'A temple with stacked thatched roofs on a rock in the sea, on the island of rice terraces just east of Java. Indonesia’s best-known holiday island.',
+          nl: 'Een tempelpoort die middendoor gespleten is, met groene rijstvelden eromheen en een vulkaan erachter. Het bekendste vakantie-eiland van Indonesië, vlak ten oosten van Java.',
+          en: 'A temple gate split down the middle, with green rice fields around it and a volcano behind. Indonesia’s best-known holiday island, just east of Java.',
         } },
       { key: 'manila', name: { nl: 'Manilla (Filipijnen)', en: 'Manila (Philippines)' },
         point: [14.5995, 120.9842], zones: [[14.5995, 120.9842, 450]],
         hint: {
-          nl: 'Een eilandenrijk van duizenden eilanden, met een vlag met een gouden zon en drie sterren. Klik op het grote eiland in het noorden.',
-          en: 'An island nation of thousands of islands, with a flag bearing a golden sun and three stars. Click the big island in the north.',
+          nl: 'Een eilandenrijk van meer dan zevenduizend eilanden: een lang smal eiland in het westen, een zwerm kleine eilanden in het midden en een groot eiland in het zuiden. Klik op de hoofdstad, op het grootste eiland in het noorden.',
+          en: 'An island nation of more than seven thousand islands: a long narrow island in the west, a swarm of small ones in the middle and a big island in the south. Click the capital, on the largest island in the north.',
         } },
     ],
     hints: {
