@@ -442,6 +442,9 @@ body.dragging-num, body.dragging-num * { cursor: grabbing !important; user-selec
 .solution-coast { stroke-linecap: round; stroke-linejoin: round; }
 .sol-tip { background: var(--ink); color: #fff; border: 0; border-radius: 8px; font-weight: 600; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.3); }
 .sol-tip.leaflet-tooltip-right::before { border-right-color: var(--ink); }
+.sol-tip.leaflet-tooltip-left::before { border-left-color: var(--ink); }
+.sol-tip.leaflet-tooltip-top::before { border-top-color: var(--ink); }
+.sol-tip.leaflet-tooltip-bottom::before { border-bottom-color: var(--ink); }
 
 .toast {
   position: absolute; left: 50%; top: 74px; z-index: 600;

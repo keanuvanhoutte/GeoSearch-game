@@ -837,13 +837,114 @@
         L.polyline(p, { color: '#0b1a2c', weight: 9, opacity: 0.55, interactive: false }).addTo(solutionLayer));
       L.polyline(path, { color: '#ffc83d', weight: 5, className: 'solution-line', interactive: false }).addTo(solutionLayer);
       if (coast.length) L.polyline(coast, { color: '#ffc83d', weight: 5, className: 'solution-coast', interactive: false }).addTo(solutionLayer);
+      /* Het naambordje mag geen enkele lijn van de letter bedekken. Eerst kiest elk punt de
+         kant die het verst van zijn eigen lijnstukken ligt; daarna schuift tidyLabels() een
+         bordje dat tóch een lijn raakt door naar de eerstvolgende vrije kant. Dat gebeurt
+         opnieuw na elke verschuiving of zoom, want de kaart schaalt en het bordje niet. */
+      const SIDES = [
+        { dir: 'right', v: [1, 0], off: [14, 0], bonus: 16 },
+        { dir: 'left', v: [-1, 0], off: [-14, 0], bonus: 16 },
+        { dir: 'top', v: [0, -1], off: [0, -14], bonus: 0 },
+        { dir: 'bottom', v: [0, 1], off: [0, 14], bonus: 0 },
+      ];
+      const xy = (ll) => map.latLngToContainerPoint(L.latLng(ll));
+      const neighbours = (i) => {
+        const out = [];
+        if (path[i - 1]) out.push(path[i - 1]);
+        if (path[i + 1]) out.push(path[i + 1]);
+        if (coast.length) {
+          if (i === 0) out.push(coast[coast.length - 2]);
+          if (i === path.length - 1) out.push(coast[1]);
+        }
+        return out;
+      };
+      const labelSide = (i, pt) => {
+        const p0 = xy(pt);
+        const vs = neighbours(i).map((nb) => {
+          const p = xy(nb), dx = p.x - p0.x, dy = p.y - p0.y, len = Math.hypot(dx, dy) || 1;
+          return [dx / len, dy / len];
+        });
+        let best = SIDES[0], score = -Infinity;
+        SIDES.forEach((sd) => {
+          const gap = vs.length
+            ? Math.min(...vs.map((v) => Math.acos(Math.max(-1, Math.min(1, v[0] * sd.v[0] + v[1] * sd.v[1]))) * 180 / Math.PI))
+            : 180;
+          if (gap + sd.bonus > score) { score = gap + sd.bonus; best = sd; }
+        });
+        return best;
+      };
+      const tips = [];
       q.targets.forEach((tg, i) => {
         const m = L.marker(tg.point, {
           keyboard: false,
           icon: L.divIcon({ className: '', html: `<span class="sol-pin">${ROMAN[i]}</span>`, iconSize: [30, 30], iconAnchor: [15, 15] }),
         }).addTo(solutionLayer);
-        m.bindTooltip(esc(tg.name[state.lang]), { permanent: withLabels, direction: 'right', offset: [14, 0], className: 'sol-tip' });
+        const side = labelSide(i, tg.point);
+        const text = esc(tg.name[state.lang]);
+        m.bindTooltip(text, { permanent: withLabels, direction: side.dir, offset: side.off, className: 'sol-tip' });
+        tips.push({ m, text, pt: tg.point, side, now: { dir: side.dir, dist: 14, shift: 0 } });
       });
+
+      /* Leaflet zet er zelf nog 6 px marge bij; die telt mee in het vak dat we vrijhouden. */
+      const MARGIN = 6;
+      const boxFor = (dir, dist, shift, b, w, h) => {
+        if (dir === 'right') return { left: b.x + dist + MARGIN, top: b.y - h / 2 + shift, right: b.x + dist + MARGIN + w, bottom: b.y + h / 2 + shift };
+        if (dir === 'left') return { left: b.x - dist - MARGIN - w, top: b.y - h / 2 + shift, right: b.x - dist - MARGIN, bottom: b.y + h / 2 + shift };
+        if (dir === 'top') return { left: b.x - w / 2 + shift, top: b.y - dist - MARGIN - h, right: b.x + w / 2 + shift, bottom: b.y - dist - MARGIN };
+        return { left: b.x - w / 2 + shift, top: b.y + dist + MARGIN, right: b.x + w / 2 + shift, bottom: b.y + dist + MARGIN + h };
+      };
+      const offFor = (dir, dist, shift) => (
+        dir === 'right' ? [dist, shift]
+          : dir === 'left' ? [-dist, shift]
+            : dir === 'top' ? [shift, -dist] : [shift, dist]);
+      const cuts = (r, segs) => {
+        const inside = (p) => p.x >= r.left && p.x <= r.right && p.y >= r.top && p.y <= r.bottom;
+        const cross = (p, q2, s2, t2) => {
+          const d = (q2.x - p.x) * (t2.y - s2.y) - (q2.y - p.y) * (t2.x - s2.x);
+          if (!d) return false;
+          const u = ((s2.x - p.x) * (t2.y - s2.y) - (s2.y - p.y) * (t2.x - s2.x)) / d;
+          const v = ((s2.x - p.x) * (q2.y - p.y) - (s2.y - p.y) * (q2.x - p.x)) / d;
+          return u >= 0 && u <= 1 && v >= 0 && v <= 1;
+        };
+        const c = [{ x: r.left, y: r.top }, { x: r.right, y: r.top }, { x: r.right, y: r.bottom }, { x: r.left, y: r.bottom }];
+        return segs.some(([p, q2]) => inside(p) || inside(q2) || c.some((pt, i) => cross(p, q2, pt, c[(i + 1) % 4])));
+      };
+      function tidyLabels() {
+        if (!withLabels || !map) return;
+        const segs = [];
+        [path, coast].filter((p) => p.length).forEach((p) => {
+          const pts = p.map(xy);
+          for (let i = 0; i + 1 < pts.length; i++) segs.push([pts[i], pts[i + 1]]);
+        });
+        tips.forEach((t) => {
+          const tip = t.m.getTooltip();
+          const el = tip && tip.getElement();
+          if (!el) return;
+          const w = el.offsetWidth, h = el.offsetHeight, b = xy(t.pt);
+          const dirs = [t.side.dir].concat(SIDES.map((sd) => sd.dir).filter((d) => d !== t.side.dir));
+          let pick = null;
+          for (const dist of [14, 40]) {
+            for (const dir of dirs) {
+              const step = dir === 'top' || dir === 'bottom' ? w / 2 + 16 : h + 8;
+              for (const shift of [0, step, -step]) {
+                if (!cuts(boxFor(dir, dist, shift, b, w, h), segs)) { pick = { dir, dist, shift }; break; }
+              }
+              if (pick) break;
+            }
+            if (pick) break;
+          }
+          if (!pick) return;
+          if (pick.dir === t.now.dir && pick.dist === t.now.dist && pick.shift === t.now.shift) return;
+          t.now = pick;
+          t.m.unbindTooltip();
+          t.m.bindTooltip(t.text, { permanent: true, direction: pick.dir, offset: offFor(pick.dir, pick.dist, pick.shift), className: 'sol-tip' });
+        });
+      }
+      if (withLabels) {
+        map.on('moveend zoomend', tidyLabels);
+        setTimeout(tidyLabels, animate ? 1500 : 120);
+      }
+
       const bounds = L.latLngBounds(path.concat(coast)).pad(0.2);
       if (animate) map.flyToBounds(bounds, { duration: 1.2 });
       else map.fitBounds(bounds);
