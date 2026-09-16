@@ -3,7 +3,9 @@
   const TEXT = window.GeoText;
   const CARDS = window.GeoCards;
   const FINAL = window.GeoFinalWord;
-  const STORE_KEY = 'geosearch-v1';
+  const PUZZLE = window.GeoPuzzle;
+  // Elke reis bewaart haar eigen voortgang; de eerste reis houdt de oorspronkelijke sleutel.
+  const STORE_KEY = PUZZLE ? PUZZLE.storeKey(PUZZLE.id) : 'geosearch-v1';
   const SPLIT_KEY = 'geosearch-split'; // breedte van de plaatkolom, door de speler versleept
   const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -58,6 +60,8 @@
 
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const solvedCount = () => RIDDLES.filter((q) => state.r[q.id].letter).length;
+  // Het slot van het spel: pas als het eindwoord van élke reis gevonden is.
+  const allJourneysDone = () => !!PUZZLE && PUZZLE.list.length > 1 && PUZZLE.solved().length === PUZZLE.list.length;
   const placesLine = (q) =>
     t('placesSub', { n: TEXT[state.lang].numbers[q.targets.length] || q.targets.length, p: q.position });
   // Eerstvolgende nog niet opgeloste raadsel na positie fromIdx (loopt rond).
@@ -103,6 +107,67 @@
       </g>
       <path d="M250 300L470 560L900 250L1210 520L760 700L250 300" fill="none" stroke="#ffc83d" stroke-width="3" stroke-opacity=".9"></path>
       <g fill="#ffc83d"><circle cx="250" cy="300" r="9"></circle><circle cx="470" cy="560" r="9"></circle><circle cx="900" cy="250" r="9"></circle><circle cx="1210" cy="520" r="9"></circle><circle cx="760" cy="700" r="9"></circle></g>
+    </svg>`;
+
+  /* Slotbeeld: de wereldbol, voor wie alle vier de reizen heeft uitgespeeld. */
+  const GLOBE_ART = `
+    <svg viewBox="0 0 1440 940" preserveAspectRatio="xMidYMid slice">
+      <defs>
+        <radialGradient id="ga-sky" cx="50%" cy="42%" r="72%">
+          <stop offset="0%" stop-color="#14405f"></stop><stop offset="100%" stop-color="#050f1c"></stop>
+        </radialGradient>
+        <radialGradient id="ga-sea" cx="36%" cy="30%" r="80%">
+          <stop offset="0%" stop-color="#4a97d0"></stop><stop offset="55%" stop-color="#1f5f9b"></stop><stop offset="100%" stop-color="#0c3057"></stop>
+        </radialGradient>
+        <radialGradient id="ga-shade" cx="34%" cy="28%" r="86%">
+          <stop offset="0%" stop-color="#ffffff" stop-opacity=".2"></stop>
+          <stop offset="52%" stop-color="#ffffff" stop-opacity="0"></stop>
+          <stop offset="100%" stop-color="#020a14" stop-opacity=".62"></stop>
+        </radialGradient>
+        <radialGradient id="ga-halo" cx="50%" cy="50%" r="50%">
+          <stop offset="62%" stop-color="#7fd0d8" stop-opacity="0"></stop>
+          <stop offset="84%" stop-color="#7fd0d8" stop-opacity=".22"></stop>
+          <stop offset="100%" stop-color="#7fd0d8" stop-opacity="0"></stop>
+        </radialGradient>
+        <clipPath id="ga-ball"><circle cx="720" cy="470" r="300"></circle></clipPath>
+      </defs>
+      <rect width="1440" height="940" fill="url(#ga-sky)"></rect>
+      <g fill="#cfe9ef">
+        <circle cx="150" cy="120" r="2.6" opacity=".85"></circle><circle cx="300" cy="230" r="1.8" opacity=".6"></circle>
+        <circle cx="90" cy="420" r="2" opacity=".5"></circle><circle cx="250" cy="620" r="2.4" opacity=".7"></circle>
+        <circle cx="130" cy="800" r="1.8" opacity=".5"></circle><circle cx="380" cy="860" r="2.2" opacity=".6"></circle>
+        <circle cx="1310" cy="140" r="2.4" opacity=".8"></circle><circle cx="1160" cy="250" r="1.8" opacity=".55"></circle>
+        <circle cx="1370" cy="470" r="2" opacity=".6"></circle><circle cx="1210" cy="660" r="2.4" opacity=".7"></circle>
+        <circle cx="1330" cy="820" r="1.8" opacity=".5"></circle><circle cx="1060" cy="860" r="2.2" opacity=".55"></circle>
+        <circle cx="620" cy="80" r="1.8" opacity=".5"></circle><circle cx="840" cy="120" r="2.2" opacity=".65"></circle>
+        <circle cx="700" cy="890" r="2" opacity=".5"></circle><circle cx="950" cy="70" r="1.6" opacity=".45"></circle>
+      </g>
+      <circle cx="720" cy="470" r="380" fill="url(#ga-halo)"></circle>
+      <circle cx="720" cy="470" r="300" fill="url(#ga-sea)"></circle>
+      <g clip-path="url(#ga-ball)">
+        <g fill="#2f7a6b" stroke="#0c3057" stroke-opacity=".45" stroke-width="3" stroke-linejoin="round">
+          <path d="M660 300C690 292 720 298 736 312C748 322 744 336 730 342C714 348 700 344 686 350C672 356 658 350 654 338C650 326 648 306 660 300Z"></path>
+          <path d="M672 372C700 360 740 364 758 384C776 404 776 432 768 456C760 480 748 506 736 532C724 558 712 586 696 596C682 604 670 592 666 574C662 554 654 534 646 512C636 486 634 458 640 432C646 406 654 382 672 372Z"></path>
+          <path d="M772 368C792 360 812 366 818 380C824 394 814 408 798 412C784 416 772 408 768 396C764 384 762 374 772 368Z"></path>
+          <path d="M468 288C510 274 556 282 574 306C590 328 578 350 560 362C542 374 522 372 508 382C492 394 476 390 468 376C458 358 452 300 468 288Z"></path>
+          <path d="M520 428C548 416 578 424 590 446C602 468 596 496 584 520C572 544 560 574 544 586C530 596 518 586 514 568C510 548 500 528 494 506C488 482 494 452 506 438Z"></path>
+          <path d="M598 262C624 252 652 258 660 272C668 286 656 300 638 302C620 304 602 296 596 282C592 272 590 266 598 262Z"></path>
+          <path d="M800 300C860 288 930 296 968 318C998 336 998 362 978 376C958 390 926 386 900 394C876 402 856 418 836 412C818 406 812 384 816 362C820 340 786 310 800 300Z"></path>
+          <path d="M918 546C948 534 982 542 992 562C1002 582 988 602 964 608C940 614 916 604 908 586C900 568 902 552 918 546Z"></path>
+        </g>
+        <g fill="none" stroke="#cfe9ef" stroke-opacity=".16" stroke-width="2">
+          <ellipse cx="720" cy="470" rx="230" ry="300"></ellipse>
+          <ellipse cx="720" cy="470" rx="145" ry="300"></ellipse>
+          <ellipse cx="720" cy="470" rx="60" ry="300"></ellipse>
+          <path d="M420 470H1020"></path>
+          <ellipse cx="720" cy="352" rx="276" ry="52"></ellipse>
+          <ellipse cx="720" cy="588" rx="276" ry="52"></ellipse>
+          <ellipse cx="720" cy="248" rx="206" ry="40"></ellipse>
+          <ellipse cx="720" cy="692" rx="206" ry="40"></ellipse>
+        </g>
+      </g>
+      <circle cx="720" cy="470" r="300" fill="url(#ga-shade)"></circle>
+      <circle cx="720" cy="470" r="300" fill="none" stroke="#9fdce4" stroke-opacity=".45" stroke-width="2.5"></circle>
     </svg>`;
 
   const SEARCH_ICON = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"></circle><path d="M15.5 15.5L21 21"></path></svg>';
@@ -344,8 +409,20 @@
   function renderHome() {
     const upcoming = nextUnsolved(-1);
     const startHref = upcoming ? `#/raadsel/${upcoming.id}` : '#/finale';
+    const words = TEXT[state.lang].numbers;
     const steps = [1, 2, 3].map((n) => `
-      <li><span class="step-num">${n}</span><div><b>${t(`how${n}t`)}</b><span class="step-text">${t(`how${n}`)}</span></div></li>`).join('');
+      <li><span class="step-num">${n}</span><div><b>${t(`how${n}t`)}</b><span class="step-text">${t(`how${n}`, { n: words[FINAL.length] || FINAL.length })}</span></div></li>`).join('');
+    // Keuze tussen de reizen: elke reis is een eigen set raadsels met een eigen eindwoord.
+    const picker = !PUZZLE || PUZZLE.list.length < 2 ? '' : `
+      <div class="picker">
+        <div class="picker-label">${t('pickTitle')}</div>
+        <div class="picker-row">
+          ${PUZZLE.list.map((p) => `
+            <button class="pchip ${p.id === PUZZLE.id ? 'on' : ''}" type="button" data-pz="${p.id}" ${p.id === PUZZLE.id ? 'aria-current="true"' : ''}>
+              <b>${esc(p.name[state.lang] || p.name.nl)}</b><small>${t('pickSub', { n: p.riddles })}</small>
+            </button>`).join('')}
+        </div>
+      </div>`;
 
     renderShell({ type: 'home' }, `
       <div class="home">
@@ -355,10 +432,17 @@
             <h1>${t('introHello')}</h1>
             <p class="lead">${t('intro')}</p>
           </div>
-          <a class="btn gold big" href="${startHref}">${t('start')} →</a>
+          <div class="home-cta">
+            <a class="btn gold big" href="${startHref}">${t('start')} →</a>
+            ${allJourneysDone() ? `<a class="grand-link" href="#/slot"><b>Blue planet, our world</b><small>${t('grandLink')} →</small></a>` : ''}
+          </div>
         </div>
         <ol class="steps">${steps}</ol>
+        ${picker}
       </div>`, 'main-home');
+
+    document.querySelectorAll('[data-pz]').forEach((btn) =>
+      btn.addEventListener('click', () => PUZZLE.select(btn.dataset.pz)));
   }
 
   /* ---------- raadsel ---------- */
@@ -1157,6 +1241,7 @@
       if (input.value.trim().toUpperCase() === FINAL) {
         state.final = true;
         save();
+        if (allJourneysDone()) { renderGrand(); return; }
         renderWon();
         celebrate($('.won-content'), true);
       } else {
@@ -1177,17 +1262,42 @@
       <section class="won">
         <div class="won-art" aria-hidden="true">${WON_ART}</div>
         <div class="won-content">
-          <span class="won-pill">${t('wonBadge')}</span>
+          <span class="won-pill">${t('wonBadge', { n: (TEXT[state.lang].numbers[RIDDLES.length] || RIDDLES.length).toLowerCase() })}</span>
           <h1>${t('wonTitle')}</h1>
           <p>${t('wonText')}</p>
           <div class="won-letters" aria-label="${FINAL}">${[...FINAL].map((l, i) => `<span style="--i:${i}">${l}</span>`).join('')}</div>
           <div class="won-actions">
-            <button class="btn gold big" type="button" id="again">${t('playAgain')}</button>
+            ${allJourneysDone() ? `<a class="btn gold big" href="#/slot">${t('grandToFinale')} →</a>` : ''}
+            <button class="btn ${allJourneysDone() ? 'ghost-light' : 'gold'} big" type="button" id="again">${t('playAgain')}</button>
             <a class="btn ghost-light big" href="#/">${t('backToRiddles')}</a>
           </div>
         </div>
       </section>`;
     $('#again').addEventListener('click', async () => { if (await confirmReset()) goHome(); });
+  }
+
+  /* ---------- slot: alle reizen uitgespeeld ---------- */
+  function renderGrand() {
+    document.documentElement.lang = state.lang;
+    const words = ['blue', 'planet', 'our', 'world']
+      .map((id) => (PUZZLE.list.find((p) => p.id === id) || {}).word)
+      .filter(Boolean);
+    const line = ['Blue', 'planet,', 'our', 'world']
+      .map((w, i) => `<span style="--i:${i}">${w}</span>`).join(' ');
+    app.innerHTML = `
+      <section class="grand">
+        <div class="grand-art" aria-hidden="true">${GLOBE_ART}</div>
+        <div class="grand-content">
+          <span class="won-pill">${t('grandBadge')}</span>
+          <h1 class="grand-title" aria-label="Blue planet, our world">${line}</h1>
+          <p>${t('grandText')}</p>
+          <div class="grand-words">${words.map((w) => `<span>${esc(w)}</span>`).join('<i>·</i>')}</div>
+          <div class="won-actions">
+            <a class="btn gold big" href="#/">${t('home')}</a>
+          </div>
+        </div>
+      </section>`;
+    celebrate($('.grand-content'), true);
   }
 
   /* ---------- confetti ---------- */
@@ -1213,12 +1323,13 @@
   /* ---------- router ---------- */
   function route() {
     const hash = location.hash || '#/';
-    const m = hash.match(/^#\/raadsel\/([A-E])$/i);
+    const m = hash.match(/^#\/raadsel\/([A-Z])$/i);
     destroyMap();
     lightbox.hidden = true;
     closeDialog(false);
     if (m) renderRiddle(m[1].toUpperCase());
     else if (hash === '#/finale') renderFinal();
+    else if (hash === '#/slot') { if (allJourneysDone()) renderGrand(); else renderHome(); }
     else renderHome();
     const main = $('.main');
     if (main) main.scrollTop = 0;
