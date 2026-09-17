@@ -870,9 +870,15 @@
             <path d="M113.2 114.2 L125.1 115.6 L129.1 127.8 L121.1 131.8 L113.2 123.7 Z"></path>
             <path d="M109.2 152.2 L119.8 160.3 L135.7 168.5 L142.3 186.1 L137.0 199.7 L127.8 209.2 L114.5 203.7 L109.2 191.5 L95.9 184.7 L84.0 187.5 L94.6 176.6 L101.2 168.5 L106.5 160.3 Z"></path>
           </g>
+          <path d="M7 188L24 200L40 214L44 236H7Z" fill="#e6d9be" stroke="#2b2118" stroke-opacity=".5" stroke-width="1.4" stroke-linejoin="round"></path>
           <g fill="none" stroke="#f6f2ea" stroke-opacity=".55" stroke-width="1.3">
-            <path d="M12 60C24 54 36 58 48 54M112 96C124 90 136 94 148 90M14 200C26 194 40 198 52 194M104 224C116 218 130 222 146 218"></path>
+            <path d="M12 60C24 54 36 58 48 54M14 200C26 194 40 198 52 194M104 228C116 222 130 226 146 222"></path>
           </g>
+          <g fill="none" stroke="#46697a" stroke-opacity=".45" stroke-width="1.2">
+            <path d="M118 64C128 58 136 60 144 56M120 178C130 172 138 174 146 170"></path>
+          </g>
+          <text transform="translate(144 168) rotate(-90)" font-family="'EB Garamond',serif" font-size="10" letter-spacing="4" fill="#2b2118" fill-opacity=".5">${lang === 'en' ? 'PACIFIC OCEAN' : 'STILLE OCEAAN'}</text>
+          <text transform="translate(19 202) rotate(-90)" font-family="'EB Garamond',serif" font-size="8" letter-spacing="2.5" fill="#2b2118" fill-opacity=".32">${lang === 'en' ? 'SOUTH CHINA SEA' : 'ZUID-CHINESE ZEE'}</text>
           <circle cx="69.4" cy="87.1" r="4" fill="#9e3b28" stroke="#2b2118" stroke-width="1.4"></circle>
           <circle cx="69.4" cy="87.1" r="8.5" fill="none" stroke="#9e3b28" stroke-opacity=".55" stroke-width="1.4"></circle>
           <path d="M14 232H146" stroke="#2b2118" stroke-opacity=".3" stroke-width="1.2"></path>

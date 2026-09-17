@@ -174,8 +174,8 @@ window.GeoRiddlesBlue = [
       { key: 'manila', name: { nl: 'Manilla (Filipijnen)', en: 'Manila (Philippines)' },
         point: [14.5995, 120.9842], zones: [[14.5995, 120.9842, 450]],
         hint: {
-          nl: 'Een eilandenrijk van meer dan zevenduizend eilanden: een lang smal eiland in het westen, een zwerm kleine eilanden in het midden en een groot eiland in het zuiden. Klik op de hoofdstad, op het grootste eiland in het noorden.',
-          en: 'An island nation of more than seven thousand islands: a long narrow island in the west, a swarm of small ones in the middle and a big island in the south. Click the capital, on the largest island in the north.',
+          nl: 'Een eilandenrijk van meer dan zevenduizend eilanden aan de rand van de Stille Oceaan: een lang smal eiland in het westen, een zwerm kleine eilanden in het midden en een groot eiland in het zuiden. Klik op de hoofdstad, op het grootste eiland in het noorden.',
+          en: 'An island nation of more than seven thousand islands on the edge of the Pacific Ocean: a long narrow island in the west, a swarm of small ones in the middle and a big island in the south. Click the capital, on the largest island in the north.',
         } },
     ],
     hints: {
