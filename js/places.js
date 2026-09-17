@@ -91,7 +91,7 @@
     P('Porto', 'Porto', ['oporto', 'port', 'portwijn', 'port wine'], [41.1579, -8.6291], 10),
     P('Zwarte Zee', 'Black Sea', ['black sea', 'zwarte zee', 'krim', 'crimea'], [43.4, 34.3], 5),
     P('Tsjernobyl', 'Chernobyl', ['chernobyl', 'tsjernobil', 'pripjat', 'pripyat', 'oekraine', 'ukraine'], [51.3890, 30.0990], 10),
-    P('Bhutan', 'Bhutan', ['bhoetan', 'thimphu'], [27.5, 90.5], 7),
+    P('Bhutan', 'Bhutan', ['bhoetan', 'thimphu', 'timphu', 'paro', 'druk yul', 'donderdraak', 'land van de donderdraak', 'tijgernest', 'tiger nest', "tiger's nest", 'taktsang'], [27.5, 90.5], 7),
     P('Oslo', 'Oslo', ['noorwegen', 'norway'], [59.9139, 10.7522], 9),
     P('Istanbul', 'Istanbul', ['istanboel', 'turkije', 'turkey', 'bosporus'], [41.0082, 28.9784], 9),
     P('Berlijn', 'Berlin', ['berlin', 'duitsland', 'germany', 'brandenburger tor'], [52.5200, 13.4050], 9),

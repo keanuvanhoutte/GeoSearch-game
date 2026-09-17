@@ -112,11 +112,11 @@ window.GeoRiddlesPlanet = [
           nl: 'Een tweelingtoren met een brug tussen de twee helften, in de hoofdstad van Maleisië, vlak bij de evenaar.',
           en: 'Twin towers with a bridge between them, in the capital of Malaysia, right near the equator.',
         } },
-      { key: 'xian', name: { nl: 'Terracottaleger, Xi’an (China)', en: 'Terracotta Army, Xi’an (China)' },
-        point: [34.3841, 109.2785], zones: [[34.3841, 109.2785, 400]],
+      { key: 'bhutan', name: { nl: 'Bhutan', en: 'Bhutan' },
+        point: [27.4728, 89.6390], zones: [[27.45, 90.40, 240]],
         hint: {
-          nl: 'Duizenden kleien soldaten in rijen in een kuil, begraven bij het graf van de eerste keizer van China.',
-          en: 'Thousands of clay soldiers in rows in a pit, buried by the tomb of the first emperor of China.',
+          nl: 'Een klein koninkrijk in de Himalaya met een witte draak op de vlag. Het telt zijn geluk in plaats van zijn geld en hangt zijn kloosters tegen de rotswand.',
+          en: 'A small kingdom in the Himalayas with a white dragon on its flag. It counts its happiness instead of its money and hangs its monasteries on the cliffs.',
         } },
     ],
     hints: {
@@ -159,6 +159,12 @@ window.GeoRiddlesPlanet = [
         hint: {
           nl: 'Een kerncentrale die in 1986 ontplofte. De stad ernaast staat sindsdien leeg: een reuzenrad dat nooit heeft gedraaid, een verlaten flat, en niemand die er nog woont. Het ligt in het noorden van Oekraïne.',
           en: 'A nuclear power station that exploded in 1986. The town beside it has stood empty ever since: a Ferris wheel that never turned, an abandoned block of flats, and nobody living there. It lies in the north of Ukraine.',
+        } },
+      { key: 'amsterdam', name: { nl: 'Amsterdam', en: 'Amsterdam' },
+        point: [52.3676, 4.9041], zones: [[52.3676, 4.9041, 300]],
+        hint: {
+          nl: 'Een molen, tulpen en een fiets bij het water. De hoofdstad van het lage land aan de Noordzee.',
+          en: 'A windmill, tulips and a bicycle by the water. The capital of the low country on the North Sea.',
         } },
     ],
     hints: {
