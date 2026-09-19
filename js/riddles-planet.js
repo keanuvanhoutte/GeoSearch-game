@@ -66,8 +66,8 @@ window.GeoRiddlesPlanet = [
       { key: 'amazon', name: { nl: 'Monding van de Amazone', en: 'Mouth of the Amazon' },
         point: [-1.4558, -48.5039], zones: [[-1.4558, -48.5039, 500]],
         hint: {
-          nl: 'Daar waar de grootste rivier ter wereld in de oceaan stroomt, met toekans in het regenwoud. Ze mondt uit op de evenaar, aan de oostkant.',
-          en: 'Where the largest river in the world flows into the ocean, with toucans in the rainforest. It reaches the sea on the equator, on the eastern side.',
+          nl: 'De rode cirkel op de kaart: de plek waar de grootste rivier ter wereld na duizenden kilometers door het regenwoud in de Atlantische Oceaan uitmondt, vlak onder de evenaar.',
+          en: 'The red circle on the map: the place where the largest river in the world flows into the Atlantic Ocean after thousands of kilometres through the rainforest, just below the equator.',
         } },
       { key: 'machupicchu', name: { nl: 'Machu Picchu (Peru)', en: 'Machu Picchu (Peru)' },
         point: [-13.1631, -72.5450], zones: [[-13.1631, -72.5450, 400]],
