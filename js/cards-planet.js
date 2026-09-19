@@ -290,8 +290,6 @@
           </g>
           <circle cx="171.2" cy="90.8" r="13" fill="none" stroke="#9e3b28" stroke-width="2.6"></circle>
           <circle cx="171.2" cy="90.8" r="17" fill="none" stroke="#9e3b28" stroke-opacity=".35" stroke-width="1.2" stroke-dasharray="3 3"></circle>
-          <text x="126" y="206" text-anchor="middle" font-family="'EB Garamond',serif" font-size="11" letter-spacing="3" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'THE MOUTH' : 'DE UITMONDING'}</text>
-          <text x="126" y="222" text-anchor="middle" font-family="'EB Garamond',serif" font-size="11" letter-spacing="3" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'OF THE AMAZON' : 'VAN DE AMAZONE'}</text>
           ${box(252, 'III')}
         </g>
         ${plus(876)}
