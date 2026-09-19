@@ -72,8 +72,8 @@ window.GeoRiddlesPlanet = [
       { key: 'machupicchu', name: { nl: 'Machu Picchu (Peru)', en: 'Machu Picchu (Peru)' },
         point: [-13.1631, -72.5450], zones: [[-13.1631, -72.5450, 400]],
         hint: {
-          nl: 'Een verloren stad van de Inca’s met terrassen, hoog op een bergkam tussen twee steile toppen. Er lopen lama’s rond.',
-          en: 'A lost Inca city with terraces, high on a ridge between two steep peaks. Llamas walk around it.',
+          nl: 'Deze Inca-vorst in zijn geruite tuniek wijst naar de verloren stad van zijn volk: eeuwenlang vergeten, hoog op een bergkam in de Andes tussen twee steile toppen, pas in 1911 teruggevonden.',
+          en: 'This Inca ruler in his checkered tunic points to the lost city of his people: forgotten for centuries, high on an Andes ridge between two steep peaks, only rediscovered in 1911.',
         } },
     ],
     hints: {

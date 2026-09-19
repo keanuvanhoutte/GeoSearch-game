@@ -145,7 +145,7 @@
     P('Bogotá', 'Bogotá', ['bogota'], [4.7110, -74.0721], 9),
     P('Colombia', 'Colombia', [], [4.6, -74.3], 5),
     P('Monding van de Amazone', 'Mouth of the Amazon', ['amazonemonding', 'belem', 'amazone', 'monding amazone', 'amazonerivier'], [-1.4558, -48.5039], 7),
-    P('Machu Picchu', 'Machu Picchu', ['machupicchu', 'inca stad', 'incastad', 'verloren stad van de inca', 'lost city of the incas'], [-13.1631, -72.5450], 12),
+    P('Machu Picchu', 'Machu Picchu', ['machupicchu', 'inca stad', 'incastad', 'verloren stad van de inca', 'lost city of the incas', 'verloren stad', 'lost city', 'inca', 'incas', 'inca rijk', 'inkarijk'], [-13.1631, -72.5450], 12),
     P('Peru', 'Peru', [], [-9.2, -75.0], 5),
     P('Sri Lanka', 'Sri Lanka', ['ceylon', 'colombo'], [6.9271, 79.8612], 8),
     P('K2', 'K2', ['karakorum', 'karakoram'], [35.8808, 76.5133], 9),
