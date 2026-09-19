@@ -833,10 +833,6 @@
           <path d="M112 146L126 112" stroke="#a8812f" stroke-width="2"></path>
           <path d="M22 146H140C146 146 150 150 150 156V162H22Z" fill="#2b2118" stroke="#2b2118" stroke-width="1.6" stroke-linejoin="round"></path>
           <path d="M26 150H146" stroke="#f6f2ea" stroke-opacity=".25" stroke-width="1"></path>
-          <path d="M8 148H30V158H8Z" fill="#f6f2ea" stroke="#2b2118" stroke-width="1.3"></path>
-          <g stroke="#2b2118" stroke-width=".8"><path d="M11 148V158"></path><path d="M14 148V158"></path><path d="M17 148V158"></path><path d="M20 148V158"></path><path d="M23 148V158"></path><path d="M26 148V158"></path><path d="M29 148V158"></path></g>
-          <g fill="#2b2118"><rect x="12.6" y="148" width="1.8" height="6"></rect><rect x="15.6" y="148" width="1.8" height="6"></rect><rect x="21.6" y="148" width="1.8" height="6"></rect><rect x="24.6" y="148" width="1.8" height="6"></rect><rect x="27.6" y="148" width="1.8" height="6"></rect></g>
-          <path d="M6 146H32" stroke="#2b2118" stroke-width="2"></path>
           <g fill="#2b2118"><path d="M28 162H36L34 206H30Z"></path><path d="M134 162H142L140 206H136Z"></path></g>
           <path d="M74 162V196M80 162V196" stroke="#2b2118" stroke-width="2"></path>
           <path d="M68 196H86V200H68Z" fill="#2b2118"></path>
