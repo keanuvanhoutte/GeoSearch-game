@@ -1213,6 +1213,16 @@
     }
 
     // Oplossing van één nummer: het punt komt op de juiste plek en de kaart vliegt erheen.
+    /* Op een klein scherm staat de kaart onder de plaat en de hints. Wie daar een oplossing op de
+       kaart laat zetten, zou anders niets zien gebeuren: dan schuift de kaart in beeld. */
+    function keepMapInView() {
+      const box = $('.mapbox');
+      if (!box) return;
+      const r = box.getBoundingClientRect();
+      const zicht = Math.min(r.bottom, window.innerHeight) - Math.max(r.top, 0);
+      if (zicht < Math.min(r.height, window.innerHeight) * 0.5) box.scrollIntoView({ block: 'center' });
+    }
+
     function placeSolution(i) {
       if (map !== self) return;
       const [lat, baseLng] = q.targets[i].point;
@@ -1224,6 +1234,7 @@
       s.res[i] = 'ok';
       if (!s.given.includes(i)) s.given.push(i);
       redraw();
+      keepMapInView();
       map.flyTo([lat, lng], Math.min(Math.max(map.getZoom(), 4), 6), { duration: 1.2 });
       toast(t('solPlaced', { n: ROMAN[i] }), 'good');
     }
@@ -1373,6 +1384,7 @@
       }
       s.revealed = true;
       save();
+      keepMapInView();
       drawSolution(true);
       toast(t('revealed'));
     });
