@@ -847,20 +847,31 @@
         ${plus(416)}
         <g transform="translate(428 130)" data-num="2">
           <rect width="160" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
+          <clipPath id="fj"><rect x="7" y="7" width="146" height="236"></rect></clipPath>
           <text x="80" y="28" text-anchor="middle" font-family="'EB Garamond',serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'CAPITAL OF THE' : 'HOOFDSTAD VAN HET'}</text>
           <text x="80" y="41" text-anchor="middle" font-family="'EB Garamond',serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'NORTHERNMOST' : 'NOORDELIJKSTE'}</text>
           <text x="80" y="54" text-anchor="middle" font-family="'EB Garamond',serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'COUNTRY IN EUROPE' : 'LAND VAN EUROPA'}</text>
-          <rect x="30" y="108" width="100" height="72" fill="#9e3b28" stroke="#2b2118" stroke-width="1.8"></rect>
-          <path d="M60 108h22v72H60ZM30 133h100v22H30Z" fill="#f6f2ea"></path>
-          <path d="M66 108h10v72H66ZM30 139h100v10H30Z" fill="#2d4b86"></path>
-          <rect x="30" y="108" width="100" height="72" fill="none" stroke="#2b2118" stroke-width="1.8"></rect>
-          <path d="M80 58L90 82H83V102H77V82H70Z" fill="#9e3b28" stroke="#2b2118" stroke-width="1.5" stroke-linejoin="round"></path>
-          <text x="99" y="72" font-family="'EB Garamond',serif" font-size="15" font-weight="600" fill="#9e3b28">N</text>
-          <path d="M7 214C30 200 56 196 80 200C104 204 130 198 153 190V214Z" fill="#f6f2ea" stroke="#2b2118" stroke-opacity=".5" stroke-width="1.2"></path>
-          <path d="M22.0 184.0L30.0 197.0H26.0L33.0 210.0H11.0L18.0 197.0H14.0Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
-          <path d="M38.0 189.6L44.4 200.0H41.2L46.8 210.4H29.2L34.8 200.0H31.6Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
-          <path d="M126.0 186.8L133.2 198.5H129.6L135.9 210.2H116.1L122.4 198.5H118.8Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
-          <path d="M142.0 181.2L150.8 195.5H146.4L154.1 209.8H129.9L137.6 195.5H133.2Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
+          <g clip-path="url(#fj)">
+          <circle cx="80" cy="146" r="15" fill="#d8b657" stroke="#a8812f" stroke-width="1.2"></circle>
+          <g stroke="#d8b657" stroke-width="1.6" stroke-linecap="round"><path d="M80 124V118M62 132l-4-4M98 132l4-4M57 146h-7M110 146h7M64 158l-5 5M96 158l5 5"></path></g>
+          <path d="M7 186V96C18 100 30 112 42 128C52 142 60 152 68 158L54 186Z" fill="#5b4a36" stroke="#2b2118" stroke-width="1.8" stroke-linejoin="round"></path>
+          <path d="M153 186V88C140 94 128 108 116 126C106 140 98 150 92 156L106 186Z" fill="#5b4a36" stroke="#2b2118" stroke-width="1.8" stroke-linejoin="round"></path>
+          <path d="M7 96C18 100 30 112 42 128C34 130 24 128 14 124C12 122 9 116 7 110Z" fill="#f6f2ea" stroke="#2b2118" stroke-opacity=".5" stroke-width="1.1"></path>
+          <path d="M153 88C140 94 128 108 116 126C124 128 134 126 144 120C147 116 151 104 153 96Z" fill="#f6f2ea" stroke="#2b2118" stroke-opacity=".5" stroke-width="1.1"></path>
+          <g fill="none" stroke="#2b2118" stroke-opacity=".3" stroke-width="1.2"><path d="M20 120C24 136 28 156 30 180M120 130C118 148 116 166 114 182M40 140C42 156 44 170 44 182"></path></g>
+          <rect x="7" y="158" width="146" height="34" fill="#2d4b86" opacity=".35"></rect>
+          <rect x="7" y="158" width="146" height="34" fill="url(#pE-h)"></rect>
+          <g stroke="#d8b657" stroke-opacity=".75" stroke-width="2" stroke-linecap="round"><path d="M70 166h20M72 172h16M74 178h12M76 184h8"></path></g>
+          <path d="M7 158H153" stroke="#2b2118" stroke-opacity=".5" stroke-width="1.2"></path>
+          <g transform="translate(120 176)"><path d="M-12 0C-10 5 10 5 12 0Z" fill="#9e3b28" stroke="#2b2118" stroke-width="1.2" stroke-linejoin="round"></path><path d="M0 0V-12M0 -12C6 -10 9 -7 10 -3H0Z" fill="#f6f2ea" stroke="#2b2118" stroke-width="1.1" stroke-linejoin="round"></path></g>
+          </g>
+          <path d="M28 70L38 94H31V114H25V94H18Z" fill="#9e3b28" stroke="#2b2118" stroke-width="1.5" stroke-linejoin="round"></path>
+          <text x="44" y="84" font-family="'EB Garamond',serif" font-size="15" font-weight="600" fill="#9e3b28">N</text>
+          <path d="M7 214C30 202 56 198 80 202C104 206 130 200 153 192V214Z" fill="#f6f2ea" stroke="#2b2118" stroke-opacity=".5" stroke-width="1.2"></path>
+          <path d="M20.0 186.6L27.2 198.3H23.6L29.9 210.0H10.1L16.4 198.3H12.8Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
+          <path d="M36.0 191.8L41.6 200.9H38.8L43.7 210.0H28.3L33.2 200.9H30.4Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
+          <path d="M128.0 189.2L134.4 199.6H131.2L136.8 210.0H119.2L124.8 199.6H121.6Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
+          <path d="M144.0 184.0L152.0 197.0H148.0L155.0 210.0H133.0L140.0 197.0H136.0Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
           <path d="M7 214H153" stroke="#2b2118" stroke-width="2"></path>
           ${box(160, 'III')}
         </g>
