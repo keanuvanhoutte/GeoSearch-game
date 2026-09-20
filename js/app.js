@@ -767,7 +767,12 @@
       howto.hidden = open;
       toggle.setAttribute('aria-expanded', String(open));
       renderHints();
-      if (open) panel.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      /* Op een klein scherm staan de hints onder de kaartplaat: wie op Hints klikt, zag anders
+         niets gebeuren. Staat de kaart niet (helemaal) in beeld, dan schuiven we ze in zicht. */
+      if (open) {
+        const r = panel.getBoundingClientRect();
+        if (r.top < 8 || r.bottom > window.innerHeight - 8) panel.scrollIntoView({ block: 'center' });
+      }
     };
     renderHints();
     toggle.addEventListener('click', () => showHints(panel.hidden));
