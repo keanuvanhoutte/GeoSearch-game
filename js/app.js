@@ -887,8 +887,17 @@
       const north = Math.min(84, Math.floor(b.getNorth() / step) * step);
       const west = Math.ceil(b.getWest() / step) * step;
       const east = Math.floor(b.getEast() / step) * step;
-      const labLng = b.getWest() + (b.getEast() - b.getWest()) * 0.03;
-      const labLat = b.getSouth() + (b.getNorth() - b.getSouth()) * 0.05;
+      /* De opschriften blijven vrij van de zoekbalk bovenaan en van de nummerbalk onderaan:
+         daarom rekenen we hun plek in beeldpunten om naar graden. */
+      const size = map.getSize();
+      const box = $('#map').getBoundingClientRect();
+      const rect = (sel) => { const el = document.querySelector(sel); return el ? el.getBoundingClientRect() : null; };
+      const bar = rect('.map-bottom'), bovenin = rect('.map-top');
+      const onder = bar ? bar.top - box.top - 12 : size.y - 16;
+      const boven = bovenin ? bovenin.bottom - box.top + 22 : 30;
+      const labY = Math.max(boven, Math.min(onder, size.y - 16));
+      const labLat = map.containerPointToLatLng([0, labY]).lat;
+      const labLng = map.containerPointToLatLng([12, 0]).lng;
       const line = (pts, main) => L.polyline(pts, {
         pane: 'grid', interactive: false, color: main ? '#ffe7a6' : '#ffffff',
         weight: main ? 1.6 : 1, opacity: main ? 0.75 : 0.45, dashArray: main ? null : '4 6',
@@ -900,13 +909,15 @@
       for (let n = 0; south + n * step <= north + 1e-9; n++) {
         const lat = +(south + n * step).toFixed(6);
         line([[lat, b.getWest()], [lat, b.getEast()]], Math.abs(lat) < 1e-9);
-        label(lat, labLng, degText(lat, 'N', state.lang === 'en' ? 'S' : 'Z', step));
+        const py = map.latLngToContainerPoint([lat, labLng]).y;
+        if (py > boven - 20 && py < onder + 6) label(lat, labLng, degText(lat, 'N', state.lang === 'en' ? 'S' : 'Z', step));
       }
       for (let n = 0; west + n * step <= east + 1e-9; n++) {
         const lng = +(west + n * step).toFixed(6);
         const w = wrapLng(lng);
         line([[Math.max(-84, b.getSouth()), lng], [Math.min(84, b.getNorth()), lng]], Math.abs(w) < 1e-9);
-        label(labLat, lng, degText(w, state.lang === 'en' ? 'E' : 'O', 'W', step));
+        const px = map.latLngToContainerPoint([labLat, lng]).x;
+        if (px > 6 && px < size.x - 46) label(labLat, lng, degText(w, state.lang === 'en' ? 'E' : 'O', 'W', step));
       }
     }
     applyGrid = (on) => {
