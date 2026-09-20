@@ -7,6 +7,10 @@
   let CARDS = window.GeoCards;
   let FINAL = window.GeoFinalWord;
   let STORE_KEY = PUZZLE ? PUZZLE.storeKey(PUZZLE.id) : 'geosearch-v1';
+  const GRID_KEY = 'geosearch-grid'; // staat het gradennet op de kaart aan?
+  let gridOn = false;
+  try { gridOn = localStorage.getItem(GRID_KEY) === '1'; } catch (e) { /* geen opslag */ }
+  let applyGrid = null; // wordt door de kaart ingevuld
   const SPLIT_KEY = 'geosearch-split'; // breedte van de plaatkolom, door de speler versleept
   const ROMAN = ['I', 'II', 'III', 'IV', 'V', 'VI', 'VII', 'VIII'];
   const SVG_NS = 'http://www.w3.org/2000/svg';
@@ -256,8 +260,9 @@
 
   /* ---------- zoeken: coördinaten, bekende plekken, anders online ---------- */
   async function findPlace(query) {
-    const c = parseCoord(query);
-    if (c) return { name: query, lat: c[0], lng: c[1], zoom: 8 };
+    /* Coordinaten intikken maakte het spel te makkelijk: die zoekt de speler zelf op met het
+       raster op de kaart. parseCoord blijft wel in gebruik voor opgeslagen punten. */
+    if (parseCoord(query)) return { blocked: true };
     return window.GeoPlaces.lookup(query, state.lang) || searchOnline(query);
   }
 
@@ -297,6 +302,9 @@
     return null;
   }
 
+  const GRID_ICON = '<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.4">'
+    + '<rect x="1.5" y="1.5" width="13" height="13" rx="1.5"></rect><path d="M6 1.5v13M10.5 1.5v13M1.5 6h13M1.5 10.5h13"></path></svg>';
+
   /* ---------- dialoogvenster (in plaats van confirm) ---------- */
   const dialog = $('#dialog');
   let dialogResolve = null;
@@ -304,10 +312,23 @@
     closeDialog(false);
     $('#dialog-title').textContent = title;
     $('#dialog-text').textContent = text;
+    $('#dialog-cancel').hidden = false;
     $('#dialog-cancel').textContent = cancel;
     const okBtn = $('#dialog-ok');
     okBtn.textContent = ok;
     okBtn.className = `btn ${danger ? 'danger' : 'dark'}`;
+    dialog.hidden = false;
+    okBtn.focus();
+    return new Promise((resolve) => { dialogResolve = resolve; });
+  }
+  function askInfo({ title, text, ok }) {
+    closeDialog(false);
+    $('#dialog-title').textContent = title;
+    $('#dialog-text').textContent = text;
+    $('#dialog-cancel').hidden = true;
+    const okBtn = $('#dialog-ok');
+    okBtn.textContent = ok;
+    okBtn.className = 'btn dark';
     dialog.hidden = false;
     okBtn.focus();
     return new Promise((resolve) => { dialogResolve = resolve; });
@@ -494,6 +515,7 @@
   function destroyMap() {
     // eerst lopende zoom-animaties stoppen, anders gooit Leaflet een fout na het verwijderen
     if (map) { map.stop(); map.remove(); map = null; }
+    applyGrid = null;
   }
   const refitMap = () => { if (map) map.invalidateSize({ debounceMoveend: true }); };
 
@@ -643,6 +665,10 @@
       <div class="rhead">
         <a class="sq-btn ${prev ? '' : 'disabled'}" href="${prev ? `#/raadsel/${prev.id}` : '#/'}" aria-label="${t('prev')}">←</a>
         <div class="rhead-text"><h1>${t('riddle')} ${q.id}</h1><p>${placesLine(q)}</p></div>
+        <div class="rhead-tools">
+          <button type="button" class="hbtn${gridOn ? ' on' : ''}" id="grid-toggle" aria-pressed="${gridOn}" title="${t('gridHelp')}">${GRID_ICON}<span class="hbtn-t">${t('grid')}</span></button>
+          <button type="button" class="hbtn" id="coord-help" title="${t('coordTitle')}"><b aria-hidden="true">?</b><span class="hbtn-t">${t('coordBtn')}</span></button>
+        </div>
         <a class="sq-btn" href="${next ? `#/raadsel/${next.id}` : '#/finale'}" aria-label="${t('next')}">→</a>
       </div>
       <div class="rbody" id="rbody">
@@ -663,6 +689,20 @@
     $('#card').addEventListener('click', () => openLightbox(q.id));
     setupSplitter();
     const mapApi = setupMap(q, s, solved);
+
+    /* Raster aan of uit, en een korte uitleg over coordinaten. Beide staan in de kop, zodat ze
+       ook bij een opgelost raadsel te gebruiken zijn. */
+    const gridBtn = $('#grid-toggle');
+    gridBtn.addEventListener('click', () => {
+      gridOn = !gridOn;
+      try { localStorage.setItem(GRID_KEY, gridOn ? '1' : '0'); } catch (e) { /* geen opslag */ }
+      gridBtn.classList.toggle('on', gridOn);
+      gridBtn.setAttribute('aria-pressed', String(gridOn));
+      gridBtn.title = t(gridOn ? 'gridOn' : 'gridOff');
+      if (applyGrid) applyGrid(gridOn);
+    });
+    $('#coord-help').addEventListener('click', () => askInfo({ title: t('coordTitle'), text: t('coordText'), ok: t('coordClose') }));
+
     if (solved) return;
 
     /* Hints om uit te kiezen: wie op "Algemeen" of een nummer klikt, krijgt meteen die hint.
@@ -825,6 +865,56 @@
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 18, pane: 'labels',
     }).addTo(map);
+
+    /* Gradennet: horizontale breedtegraden en verticale lengtegraden met hun waarde erbij.
+       De maaswijdte hangt van de zoom af, zodat het net nooit dichtslibt. */
+    map.createPane('grid');
+    map.getPane('grid').style.zIndex = 260;
+    map.getPane('grid').style.pointerEvents = 'none';
+    const gridLayer = L.layerGroup();
+    const LADDER = [30, 20, 10, 5, 2, 1, 0.5, 0.25, 0.1, 0.05, 0.02, 0.01];
+    // maaswijdte naar het beeld: ongeveer vier tot zes lijnen in het kleinste venster
+    const gridStep = (b) => {
+      const want = Math.min(b.getNorth() - b.getSouth(), b.getEast() - b.getWest()) / 4;
+      return LADDER.find((v) => v <= want) || LADDER[LADDER.length - 1];
+    };
+    const wrapLng = (lng) => ((((lng + 180) % 360) + 360) % 360) - 180;
+    const degText = (v, pos, neg, step) => (Math.abs(v) < 1e-9 ? '0°' : `${Math.abs(v).toFixed(step >= 1 ? 0 : step >= 0.25 ? 1 : 2)}° ${v < 0 ? neg : pos}`);
+    function drawGrid() {
+      gridLayer.clearLayers();
+      const b = map.getBounds(), step = gridStep(b);
+      const south = Math.max(-84, Math.ceil(b.getSouth() / step) * step);
+      const north = Math.min(84, Math.floor(b.getNorth() / step) * step);
+      const west = Math.ceil(b.getWest() / step) * step;
+      const east = Math.floor(b.getEast() / step) * step;
+      const labLng = b.getWest() + (b.getEast() - b.getWest()) * 0.03;
+      const labLat = b.getSouth() + (b.getNorth() - b.getSouth()) * 0.05;
+      const line = (pts, main) => L.polyline(pts, {
+        pane: 'grid', interactive: false, color: main ? '#ffe7a6' : '#ffffff',
+        weight: main ? 1.6 : 1, opacity: main ? 0.75 : 0.45, dashArray: main ? null : '4 6',
+      }).addTo(gridLayer);
+      const label = (lat, lng, text) => L.marker([lat, lng], {
+        pane: 'grid', interactive: false, keyboard: false,
+        icon: L.divIcon({ className: 'grid-lab', html: text, iconSize: null }),
+      }).addTo(gridLayer);
+      for (let n = 0; south + n * step <= north + 1e-9; n++) {
+        const lat = +(south + n * step).toFixed(6);
+        line([[lat, b.getWest()], [lat, b.getEast()]], Math.abs(lat) < 1e-9);
+        label(lat, labLng, degText(lat, 'N', state.lang === 'en' ? 'S' : 'Z', step));
+      }
+      for (let n = 0; west + n * step <= east + 1e-9; n++) {
+        const lng = +(west + n * step).toFixed(6);
+        const w = wrapLng(lng);
+        line([[Math.max(-84, b.getSouth()), lng], [Math.min(84, b.getNorth()), lng]], Math.abs(w) < 1e-9);
+        label(labLat, lng, degText(w, state.lang === 'en' ? 'E' : 'O', 'W', step));
+      }
+    }
+    applyGrid = (on) => {
+      if (!map) return;
+      if (on) { gridLayer.addTo(map); drawGrid(); } else { gridLayer.clearLayers(); gridLayer.remove(); }
+    };
+    map.on('moveend zoomend', () => { if (gridOn) drawGrid(); });
+    if (gridOn) applyGrid(true);
 
     const solutionLayer = L.layerGroup().addTo(map);
 
@@ -1326,7 +1416,8 @@
       searching = false;
       form.classList.remove('busy');
       if (map !== self) return; // de speler zit intussen op een ander scherm
-      if (hit) { showResult(hit); input.blur(); }
+      if (hit && hit.blocked) toast(t('coordBlocked'), 'error');
+      else if (hit) { showResult(hit); input.blur(); }
       else toast(failed ? t('searchFail') : t('notFound', { q: query }), 'error');
     });
 

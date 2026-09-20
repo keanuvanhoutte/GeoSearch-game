@@ -656,3 +656,25 @@ a.key-row:hover { background: var(--paper); }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* knoppen in de kop van een raadsel: raster aan/uit en uitleg over coordinaten */
+.rhead-tools { display: flex; gap: 8px; flex: none; }
+.hbtn {
+  display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 14px;
+  border-radius: 10px; border: 1px solid var(--line); background: #fff;
+  font-size: 14px; font-weight: 600; color: var(--muted); white-space: nowrap;
+  transition: border-color .12s, color .12s, background .12s;
+}
+.hbtn:hover { border-color: var(--ink); color: var(--ink); }
+.hbtn.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+
+/* opschriften bij het gradennet op de kaart */
+.grid-lab {
+  font: 600 11px/1 var(--mono, ui-monospace, monospace); color: #fff; white-space: nowrap;
+  text-shadow: 0 1px 3px rgba(0,0,0,.85), 0 0 2px rgba(0,0,0,.9); width: auto !important; height: auto !important;
+}
+.dialog-text { white-space: pre-line; }
+@media (max-width: 900px) {
+  .hbtn { padding: 0 11px; }
+  .hbtn-t { display: none; }
+}
