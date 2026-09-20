@@ -1399,7 +1399,15 @@
         keyboard: false,
         icon: L.divIcon({ className: '', html: '<span class="search-pin"></span>', iconSize: [36, 36], iconAnchor: [18, 18] }),
       }).addTo(searchLayer);
-      marker.bindPopup(pop, { className: 'search-popup', offset: [0, -14], minWidth: Math.max(190, N * 42 + 8) });
+      /* Op een smalle kaart mag het venstertje niet breder zijn dan de kaart zelf: anders schuift
+         Leaflet de hele kaart opzij om het te laten passen en verdwijnt de speld uit beeld. */
+      const mapW = map.getSize().x;
+      const want = Math.max(190, N * 42 + 8);
+      marker.bindPopup(pop, {
+        className: 'search-popup', offset: [0, -14], autoPanPadding: [10, 10],
+        minWidth: Math.max(150, Math.min(want, mapW - 70)),
+        maxWidth: Math.max(160, mapW - 50),
+      });
       marker.on('popupopen', fillPop);
 
       const b = hit.bounds;
