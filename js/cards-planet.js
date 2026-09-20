@@ -848,23 +848,14 @@
         <g transform="translate(428 130)" data-num="2">
           <rect width="160" height="250" fill="#faf4e6" stroke="#2b2118" stroke-width="2"></rect>
           <text x="80" y="28" text-anchor="middle" font-family="'EB Garamond',serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'CAPITAL OF THE' : 'HOOFDSTAD VAN HET'}</text>
-          <text x="80" y="41" text-anchor="middle" font-family="'EB Garamond',serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'NORTHERNMOST' : 'MEEST NOORDELIJKE'}</text>
-          <text x="80" y="54" text-anchor="middle" font-family="'EB Garamond',serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'COUNTRY OF THE EU' : 'LAND VAN DE EU'}</text>
-          <rect x="30" y="108" width="100" height="68" fill="#2d4b86" stroke="#2b2118" stroke-width="1.8"></rect>
-          <path d="M80.0 115.8L81.0 118.6L84.0 118.7L81.6 120.5L82.5 123.4L80.0 121.7L77.5 123.4L78.4 120.5L76.0 118.7L79.0 118.6Z" fill="#d8b657" stroke="#f6f2ea" stroke-width="1"></path>
-          <path d="M91.0 118.7L92.0 121.6L95.0 121.6L92.6 123.5L93.5 126.3L91.0 124.6L88.5 126.3L89.4 123.5L87.0 121.6L90.0 121.6Z" fill="#d8b657"></path>
-          <path d="M99.1 126.8L100.1 129.6L103.0 129.7L100.7 131.5L101.5 134.4L99.1 132.7L96.6 134.4L97.4 131.5L95.1 129.7L98.1 129.6Z" fill="#d8b657"></path>
-          <path d="M102.0 137.8L103.0 140.6L106.0 140.7L103.6 142.5L104.5 145.4L102.0 143.7L99.5 145.4L100.4 142.5L98.0 140.7L101.0 140.6Z" fill="#d8b657"></path>
-          <path d="M99.1 148.8L100.1 151.6L103.0 151.7L100.7 153.5L101.5 156.4L99.1 154.7L96.6 156.4L97.4 153.5L95.1 151.7L98.1 151.6Z" fill="#d8b657"></path>
-          <path d="M91.0 156.9L92.0 159.7L95.0 159.8L92.6 161.6L93.5 164.5L91.0 162.8L88.5 164.5L89.4 161.6L87.0 159.8L90.0 159.7Z" fill="#d8b657"></path>
-          <path d="M80.0 159.8L81.0 162.6L84.0 162.7L81.6 164.5L82.5 167.4L80.0 165.7L77.5 167.4L78.4 164.5L76.0 162.7L79.0 162.6Z" fill="#d8b657"></path>
-          <path d="M69.0 156.9L70.0 159.7L73.0 159.8L70.6 161.6L71.5 164.5L69.0 162.8L66.5 164.5L67.4 161.6L65.0 159.8L68.0 159.7Z" fill="#d8b657"></path>
-          <path d="M60.9 148.8L61.9 151.6L64.9 151.7L62.6 153.5L63.4 156.4L60.9 154.7L58.5 156.4L59.3 153.5L57.0 151.7L59.9 151.6Z" fill="#d8b657"></path>
-          <path d="M58.0 137.8L59.0 140.6L62.0 140.7L59.6 142.5L60.5 145.4L58.0 143.7L55.5 145.4L56.4 142.5L54.0 140.7L57.0 140.6Z" fill="#d8b657"></path>
-          <path d="M60.9 126.8L61.9 129.6L64.9 129.7L62.6 131.5L63.4 134.4L60.9 132.7L58.5 134.4L59.3 131.5L57.0 129.7L59.9 129.6Z" fill="#d8b657"></path>
-          <path d="M69.0 118.7L70.0 121.6L73.0 121.6L70.6 123.5L71.5 126.3L69.0 124.6L66.5 126.3L67.4 123.5L65.0 121.6L68.0 121.6Z" fill="#d8b657"></path>
-          <path d="M80 60L90 84H83V104H77V84H70Z" fill="#9e3b28" stroke="#2b2118" stroke-width="1.5" stroke-linejoin="round"></path>
-          <text x="99" y="74" font-family="'EB Garamond',serif" font-size="15" font-weight="600" fill="#9e3b28">N</text>
+          <text x="80" y="41" text-anchor="middle" font-family="'EB Garamond',serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'NORTHERNMOST' : 'NOORDELIJKSTE'}</text>
+          <text x="80" y="54" text-anchor="middle" font-family="'EB Garamond',serif" font-size="10" font-weight="600" letter-spacing="1.1" fill="#2b2118" fill-opacity=".8">${lang === 'en' ? 'COUNTRY IN EUROPE' : 'LAND VAN EUROPA'}</text>
+          <rect x="30" y="108" width="100" height="72" fill="#9e3b28" stroke="#2b2118" stroke-width="1.8"></rect>
+          <path d="M60 108h22v72H60ZM30 133h100v22H30Z" fill="#f6f2ea"></path>
+          <path d="M66 108h10v72H66ZM30 139h100v10H30Z" fill="#2d4b86"></path>
+          <rect x="30" y="108" width="100" height="72" fill="none" stroke="#2b2118" stroke-width="1.8"></rect>
+          <path d="M80 58L90 82H83V102H77V82H70Z" fill="#9e3b28" stroke="#2b2118" stroke-width="1.5" stroke-linejoin="round"></path>
+          <text x="99" y="72" font-family="'EB Garamond',serif" font-size="15" font-weight="600" fill="#9e3b28">N</text>
           <path d="M7 214C30 200 56 196 80 200C104 204 130 198 153 190V214Z" fill="#f6f2ea" stroke="#2b2118" stroke-opacity=".5" stroke-width="1.2"></path>
           <path d="M22.0 184.0L30.0 197.0H26.0L33.0 210.0H11.0L18.0 197.0H14.0Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
           <path d="M38.0 189.6L44.4 200.0H41.2L46.8 210.4H29.2L34.8 200.0H31.6Z" fill="#3f7a4e" stroke="#2b2118" stroke-width="1" stroke-linejoin="round"></path>
